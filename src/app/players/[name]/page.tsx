@@ -17,9 +17,15 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [highlights, setHighlights] = useState<{ id: string, video_url: string, caption: string }[]>([]);
+    const [highlights, setHighlights] = useState<any[]>([]);
     const [videoUploading, setVideoUploading] = useState(false);
+    const [showUploadForm, setShowUploadForm] = useState(false);
     const videoInputRef = useRef<HTMLInputElement>(null);
+
+    // Form settings for new video
+    const [selectedCategory, setSelectedCategory] = useState('Magia');
+    const [taggedPlayers, setTaggedPlayers] = useState<string[]>([name]);
+    const [matchDate, setMatchDate] = useState(new Date().toISOString().split('T')[0]);
 
     const leaderboard = getLeaderboard(year);
     const playerStats = leaderboard.find(p => p.name === name);
@@ -40,21 +46,31 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                 .eq('name', name)
                 .single();
 
-            if (photoData?.photo_url) {
-                setDisplayPhoto(photoData.photo_url);
-            } else {
-                setDisplayPhoto(metadata.photo);
-            }
+            if (photoData?.photo_url) setDisplayPhoto(photoData.photo_url);
+            else setDisplayPhoto(metadata.photo);
 
-            // Highlights
+            // Highlights with Join
             const { data: videoData } = await supabase
-                .from('player_highlights')
-                .select('*')
-                .eq('player_name', name)
-                .order('created_at', { ascending: false });
+                .from('highlight_players')
+                .select(`
+                    highlight_id,
+                    player_highlights (
+                        id,
+                        video_url,
+                        caption,
+                        category,
+                        match_date,
+                        created_at
+                    )
+                `)
+                .eq('player_name', name);
 
             if (videoData) {
-                setHighlights(videoData);
+                const formatted = videoData
+                    .map((item: any) => item.player_highlights)
+                    .filter(Boolean)
+                    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                setHighlights(formatted);
             }
         }
         fetchData();
@@ -67,9 +83,10 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
         try {
             setVideoUploading(true);
             const fileExt = file.name.split('.').pop();
-            const fileName = `${name}-highlight-${Date.now()}.${fileExt}`;
+            const fileName = `highlight-${Date.now()}.${fileExt}`;
             const filePath = `highlights/${fileName}`;
 
+            // 1. Storage Upload
             const { error: uploadError } = await supabase.storage
                 .from('player-highlights')
                 .upload(filePath, file);
@@ -80,29 +97,38 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                 .from('player-highlights')
                 .getPublicUrl(filePath);
 
-            const { error: dbError } = await supabase
+            // 2. Insert Highlight Record
+            const { data: highlight, error: hError } = await supabase
                 .from('player_highlights')
                 .insert({
-                    player_name: name,
                     video_url: publicUrl,
-                    caption: `Jugada destacada de ${name}`
-                });
-
-            if (dbError) throw dbError;
-
-            // Update local state
-            const { data: newHighlight } = await supabase
-                .from('player_highlights')
-                .select('*')
-                .eq('player_name', name)
-                .order('created_at', { ascending: false })
-                .limit(1)
+                    caption: `${selectedCategory} de ${taggedPlayers.join(', ')}`,
+                    category: selectedCategory,
+                    match_date: matchDate
+                })
+                .select()
                 .single();
 
-            if (newHighlight) setHighlights([newHighlight, ...highlights]);
+            if (hError) throw hError;
+
+            // 3. Insert Players Links
+            const playerLinks = taggedPlayers.map(p => ({
+                highlight_id: highlight.id,
+                player_name: p
+            }));
+
+            const { error: pError } = await supabase
+                .from('highlight_players')
+                .insert(playerLinks);
+
+            if (pError) throw pError;
+
+            setHighlights([highlight, ...highlights]);
+            setShowUploadForm(false);
+            alert('¡Video subido y etiquetado con éxito!');
         } catch (error) {
-            console.error('Error uploading video:', error);
-            alert('Error al subir video. Asegúrate de tener el bucket "player-highlights" creado en Supabase.');
+            console.error('Error:', error);
+            alert('Error al subir. Revisá el bucket y las tablas.');
         } finally {
             setVideoUploading(false);
         }
@@ -114,34 +140,15 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
 
         try {
             setUploading(true);
-
-            // 1. Upload to Supabase Storage
             const fileExt = file.name.split('.').pop();
             const fileName = `${name}-${Math.random()}.${fileExt}`;
             const filePath = `avatars/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('player-photos')
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            // 2. Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('player-photos')
-                .getPublicUrl(filePath);
-
-            // 3. Update Database (Upsert)
-            const { error: dbError } = await supabase
-                .from('player_profiles')
-                .upsert({ name, photo_url: publicUrl }, { onConflict: 'name' });
-
-            if (dbError) throw dbError;
-
+            await supabase.storage.from('player-photos').upload(filePath, file);
+            const { data: { publicUrl } } = supabase.storage.from('player-photos').getPublicUrl(filePath);
+            await supabase.from('player_profiles').upsert({ name, photo_url: publicUrl }, { onConflict: 'name' });
             setDisplayPhoto(publicUrl);
         } catch (error) {
             console.error('Error uploading photo:', error);
-            alert('Error al subir la foto. Asegurate de tener configurado Supabase.');
         } finally {
             setUploading(false);
         }
@@ -151,65 +158,39 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
         <main className="min-h-screen relative pb-40">
             <Navbar />
 
-            {/* PWA Backdrop Orbs */}
             <div className="pwa-mesh">
                 <div className="mesh-orb-1 opacity-20" />
                 <div className="mesh-orb-2 opacity-20" />
             </div>
 
-            {/* MOBILE-FIRST HEADER */}
             <section className="relative h-[65vh] flex items-end p-6 sm:p-12 overflow-hidden group">
                 <div className="absolute inset-0 z-0">
-                    <img
-                        src={displayPhoto}
-                        alt={name}
-                        className="w-full h-full object-cover grayscale opacity-50 transition-all duration-1000"
-                    />
+                    <img src={displayPhoto} alt={name} className="w-full h-full object-cover grayscale opacity-50 transition-all duration-1000" />
                     <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-transparent" />
                 </div>
 
-                {/* Upload Button Overlay */}
                 <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-sm">
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                        accept="image/*"
-                    />
-                    <button
-                        type="button"
-                        onClick={() => {
-                            console.log("Opening file picker...");
-                            fileInputRef.current?.click();
-                        }}
-                        disabled={uploading}
-                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 disabled:opacity-50"
-                    >
+                    <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" accept="image/*" />
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all">
                         {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-                        {uploading ? 'Subiendo...' : 'Cambiar Foto de Perfil'}
+                        Cambiar Foto
                     </button>
                 </div>
 
-                <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start">
-                    <Link href="/players" className="mb-12 pwa-pill flex items-center gap-2 hover:bg-white/10 transition-all">
+                <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start px-4">
+                    <Link href="/players" className="mb-12 pwa-pill flex items-center gap-2 hover:bg-white/10 transition-all text-[10px]">
                         <ArrowLeft size={14} /> Volver al Plantel
                     </Link>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="w-full"
-                    >
+                    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full">
                         <div className="flex justify-between items-end w-full">
                             <div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <span className="pwa-pill text-accent-orange border-accent-orange/30">RANGO ÉLITE</span>
                                     <span className="text-white/40 text-[9px] font-black uppercase tracking-widest italic">Activo {year}</span>
                                 </div>
-                                <h1 className="pwa-title text-8xl sm:text-[12vw]">{name}</h1>
-                                <p className="text-sm font-black text-white/30 uppercase tracking-[0.4em] mt-4 italic">
-                                    Estilo: <span className="text-white italic">{metadata.role}</span>
+                                <h1 className="pwa-title text-7xl sm:text-[10vw] leading-none mb-4">{name}</h1>
+                                <p className="text-xs font-black text-white/30 uppercase tracking-[0.4em] italic leading-relaxed">
+                                    ESTILO: <span className="text-white">{metadata.role}</span>
                                 </p>
                             </div>
                         </div>
@@ -217,47 +198,40 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                 </div>
             </section>
 
-            {/* PERFORMANCE ANALYTICS SECTION */}
-            <section className="px-6 sm:px-12 max-w-7xl mx-auto mt-12 space-y-8">
-                {/* YEAR SELECTOR */}
-                <div className="flex justify-center mb-12">
+            <section className="px-6 sm:px-12 max-w-7xl mx-auto mt-12 space-y-16">
+                <div className="flex justify-center">
                     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 flex gap-1">
                         {[2024, 2025, 2026].map(y => (
-                            <button
-                                key={y}
-                                onClick={() => setYear(y)}
-                                className={`px-8 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all ${year === y ? 'bg-accent-orange text-black' : 'text-white/40 hover:text-white/70'}`}
-                            >
+                            <button key={y} onClick={() => setYear(y)} className={`px-6 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all ${year === y ? 'bg-accent-orange text-black' : 'text-white/40 hover:text-white/70'}`}>
                                 {y}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* KPI DASHBOARD */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                    <div className="pwa-card p-6 flex flex-col justify-between h-[160px]">
                         <Target size={20} className="text-accent-orange" />
                         <div>
-                            <p className="pwa-subtitle">Rango Global {year}</p>
+                            <p className="pwa-subtitle">Rango Global</p>
                             <h4 className="text-4xl font-black italic">#{leaderboard.findIndex(p => p.name === name) !== -1 ? leaderboard.findIndex(p => p.name === name) + 1 : '--'}</h4>
                         </div>
                     </div>
-                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                    <div className="pwa-card p-6 flex flex-col justify-between h-[160px]">
                         <Zap size={20} className="text-accent-lemon" />
                         <div>
-                            <p className="pwa-subtitle">Eficacia</p>
+                            <p className="pwa-subtitle">Eficacia {year}</p>
                             <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats ? playerStats.winRate.toFixed(0) : '0'}%</h4>
                         </div>
                     </div>
-                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                    <div className="pwa-card p-6 flex flex-col justify-between h-[160px]">
                         <Activity size={20} className="text-accent-blue" />
                         <div>
                             <p className="pwa-subtitle">Puntos</p>
                             <h4 className="text-4xl font-black italic">{playerStats ? playerStats.points : '0'}</h4>
                         </div>
                     </div>
-                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                    <div className="pwa-card p-6 flex flex-col justify-between h-[160px]">
                         <Utensils size={20} className="text-accent-lemon" />
                         <div>
                             <p className="pwa-subtitle">Morfi Rate</p>
@@ -266,86 +240,110 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                     </div>
                 </div>
 
-                {/* HIGHLIGHTS SECTION */}
+                {/* TAGGED HIGHLIGHTS SECTION */}
                 <div>
-                    <div className="flex justify-between items-center mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
                         <div>
-                            <h3 className="text-2xl font-black italic uppercase tracking-tighter">Jugadas Destacadas</h3>
-                            <p className="pwa-subtitle">The Best of {name}</p>
+                            <h3 className="text-3xl font-black italic uppercase tracking-tighter">Archivo de Jugadas</h3>
+                            <p className="pwa-subtitle">Donde {name} fue protagonista</p>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <input
-                                type="file"
-                                ref={videoInputRef}
-                                onChange={handleVideoUpload}
-                                className="hidden"
-                                accept="video/*"
-                            />
+                        <button
+                            onClick={() => setShowUploadForm(!showUploadForm)}
+                            className="pwa-btn bg-accent-lemon !py-4 !px-8 text-[11px] font-black italic flex items-center gap-3"
+                        >
+                            {showUploadForm ? 'CANCELAR' : 'SUBIR JUGADA'}
+                        </button>
+                    </div>
+
+                    {showUploadForm && (
+                        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="pwa-card p-8 mb-16 bg-white/[0.04]">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase text-white/30 tracking-widest">Categoría</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Puskas', 'Blooper', 'Magia', 'Asistencia'].map(cat => (
+                                            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${selectedCategory === cat ? 'bg-accent-orange text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}>
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase text-white/30 tracking-widest">Fecha del Partido</label>
+                                    <input type="date" value={matchDate} onChange={(e) => setMatchDate(e.target.value)} className="pwa-input !py-2" />
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase text-white/30 tracking-widest italic flex justify-between">
+                                        Involucrados <span className="text-accent-lemon">({taggedPlayers.length})</span>
+                                    </label>
+                                    <div className="max-h-[120px] overflow-y-auto p-2 bg-white/5 rounded-2xl custom-scrollbar grid grid-cols-2 gap-2">
+                                        {PLAYERS.map(p => (
+                                            <button
+                                                key={p}
+                                                onClick={() => taggedPlayers.includes(p) ? setTaggedPlayers(taggedPlayers.filter(tp => tp !== p)) : setTaggedPlayers([...taggedPlayers, p])}
+                                                className={`text-left px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${taggedPlayers.includes(p) ? 'bg-white/10 text-white' : 'text-white/20'}`}
+                                            >
+                                                {taggedPlayers.includes(p) ? '✔ ' : '+ '} {p}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" ref={videoInputRef} onChange={handleVideoUpload} className="hidden" accept="video/*" />
                             <button
                                 onClick={() => videoInputRef.current?.click()}
                                 disabled={videoUploading}
-                                className="bg-accent-lemon hover:scale-105 transition-transform text-black px-6 py-3 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                                className="w-full pwa-btn bg-white text-black !py-5 font-black flex items-center justify-center gap-4"
                             >
-                                {videoUploading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                                {videoUploading ? 'SUBIENDO...' : 'SUBIR JUGADA'}
+                                {videoUploading ? <Loader2 className="animate-spin" /> : <Plus />}
+                                {videoUploading ? 'SUBIENDO Y ETIQUETANDO...' : 'SELECCIONAR VIDEO Y PUBLICAR'}
                             </button>
-                        </div>
-                    </div>
+                        </motion.div>
+                    )}
 
                     {highlights.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
                             {highlights.map((h, i) => (
-                                <motion.div
-                                    key={h.id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="pwa-card !p-0 !rounded-[32px] overflow-hidden group"
-                                >
+                                <motion.div key={h.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} className="pwa-card !p-0 !rounded-[40px] group overflow-hidden border-white/5 hover:border-white/20">
                                     <div className="aspect-[9/16] relative bg-black/40">
-                                        <video
-                                            src={h.video_url}
-                                            className="w-full h-full object-cover"
-                                            controls
-                                            playsInline
-                                        />
+                                        <div className="absolute top-6 left-6 z-20 flex gap-2">
+                                            <span className="pwa-pill !bg-black/60 backdrop-blur-md text-accent-lemon border-accent-lemon/40">{h.category}</span>
+                                            {h.match_date && <span className="pwa-pill !bg-black/60 backdrop-blur-md text-white/60 border-white/10">{h.match_date.split('-').reverse().slice(0, 2).join('/')}</span>}
+                                        </div>
+                                        <video src={h.video_url} className="w-full h-full object-cover" controls playsInline />
                                     </div>
-                                    <div className="p-6 bg-white/[0.02]">
-                                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest italic">{h.caption}</p>
+                                    <div className="p-8 bg-white/[0.01]">
+                                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mb-4">Involucrados:</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {h.caption?.split(' de ')[1]?.split(', ').map((p: string) => (
+                                                <span key={p} className={`text-[9px] font-black px-2 py-1 rounded-md ${p === name ? 'text-accent-orange' : 'text-white/60'}`}>@{p}</span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}
                         </div>
                     ) : (
-                        <div className="pwa-card p-16 flex flex-col items-center justify-center text-center bg-white/[0.01] border-dashed">
-                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6">
-                                <Activity className="text-white/10" size={32} />
-                            </div>
-                            <h4 className="text-xs font-black uppercase tracking-widest text-white/20 italic">Sin jugadas registradas</h4>
-                            <p className="text-[10px] text-white/10 mt-2 uppercase">¡Subí el primer highlight para este jugador!</p>
+                        <div className="pwa-card p-24 flex flex-col items-center justify-center text-center opacity-30 italic">
+                            <Activity size={48} className="mb-6 opacity-10" />
+                            <p className="text-xs uppercase tracking-widest font-black italic">Sin jugadas destacadas registradas</p>
                         </div>
                     )}
                 </div>
 
-                {/* TIME SERIES CHART */}
                 <div className="pwa-card p-10 bg-white/[0.01]">
-                    <div className="flex justify-between items-center mb-8">
+                    <div className="flex justify-between items-center mb-10">
                         <div>
-                            <h3 className="text-xl font-black italic uppercase tracking-tighter">Evolución {year}</h3>
-                            <p className="pwa-subtitle">Seguimiento de % de victorias</p>
+                            <h3 className="text-2xl font-black italic uppercase tracking-tighter">Tendencia de Eficacia</h3>
+                            <p className="pwa-subtitle">Evolución de victorias en {year}</p>
                         </div>
-                        <div className="pwa-pill text-accent-orange">Eficacia x {year}</div>
+                        <div className="pwa-pill text-accent-orange">Performance Chart</div>
                     </div>
-
-                    {history.length > 0 ? (
-                        <PerformanceChart data={history} />
-                    ) : (
-                        <div className="h-[300px] flex items-center justify-center text-white/10 font-black uppercase tracking-[0.2em] italic">
-                            Sin actividad en {year}
-                        </div>
-                    )}
+                    {history.length > 0 ? <PerformanceChart data={history} /> : <div className="h-[300px] flex items-center justify-center text-white/5 uppercase tracking-widest font-black italic">No hay datos de {year}</div>}
                 </div>
             </section>
         </main>
     );
 }
+
+import { PLAYERS } from '@/data/historicalData';
