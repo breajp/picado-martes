@@ -52,12 +52,12 @@ export default function CustomSelect({ options, value, onChange, placeholder, di
             <AnimatePresence>
                 {isOpen && !disabled && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 5, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute z-[100] mt-3 w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] shadow-2xl overflow-hidden backdrop-blur-3xl"
+                        exit={{ opacity: 0, y: 5, scale: 0.98 }}
+                        className="absolute z-[200] left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden backdrop-blur-3xl"
                     >
-                        <div className="max-h-[300px] overflow-y-auto p-2 custom-scrollbar">
+                        <div className="max-h-[250px] overflow-y-auto p-2 custom-scrollbar overscroll-contain">
                             {options.map((option) => (
                                 <button
                                     key={option.value}
@@ -67,8 +67,8 @@ export default function CustomSelect({ options, value, onChange, placeholder, di
                                         setIsOpen(false);
                                     }}
                                     className={`w-full flex items-center justify-between px-6 py-4 rounded-xl text-left text-xs font-black uppercase tracking-widest transition-all ${value === option.value
-                                            ? 'bg-accent-orange text-black'
-                                            : 'text-white/40 hover:bg-white/5 hover:text-white'
+                                        ? 'bg-accent-orange text-black'
+                                        : 'text-white/40 hover:bg-white/5 hover:text-white'
                                         }`}
                                 >
                                     {option.label}

@@ -65,7 +65,7 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Entry Form */}
                     <div className="lg:col-span-2 space-y-8">
-                        <div className="pwa-card p-10 bg-white/[0.02]">
+                        <div className="pwa-card !overflow-visible p-10 bg-white/[0.02]">
                             <div className="flex items-center gap-4 mb-10">
                                 <Database className="text-accent-orange" />
                                 <h2 className="text-2xl font-black italic uppercase">Nuevo Registro de Partido</h2>
