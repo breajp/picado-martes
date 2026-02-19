@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2 } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils } from 'lucide-react';
 import Link from 'next/link';
 import PerformanceChart from '@/components/PerformanceChart';
 import { supabase } from '@/lib/supabase';
@@ -190,10 +190,10 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                         </div>
                     </div>
                     <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
-                        <Shield size={20} className="text-white/20" />
+                        <Utensils size={20} className="text-accent-lemon" />
                         <div>
-                            <p className="pwa-subtitle">Partidos</p>
-                            <h4 className="text-4xl font-black italic">{playerStats ? playerStats.totalGames : '0'}</h4>
+                            <p className="pwa-subtitle">Morfi Rate</p>
+                            <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats ? playerStats.morfiRate.toFixed(0) : '0'}%</h4>
                         </div>
                     </div>
                 </div>

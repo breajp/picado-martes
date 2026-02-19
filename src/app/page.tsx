@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Leaderboard from '@/components/Leaderboard';
-import { ArrowUpRight, Zap, Trophy, Flame, Calendar } from 'lucide-react';
+import { ArrowUpRight, Zap, Trophy, Flame, Calendar, Utensils } from 'lucide-react';
 import Link from 'next/link';
 import { getLeaderboard } from '@/lib/stats';
 
@@ -12,6 +12,7 @@ export default function Home() {
   const [year, setYear] = useState<number>(2025);
   const stats = getLeaderboard(year);
   const topPlayer = stats[0];
+  const morfiMaster = [...stats].sort((a, b) => b.morfiRate - a.morfiRate)[0];
   const totalMatches = stats.reduce((acc, curr) => acc + curr.totalGames, 0) / 10; // Estimado partidos únicos
   const totalGoals = stats.reduce((acc, curr) => acc + (curr.totalGames * 3), 0); // Estimado goles totales
 
@@ -115,6 +116,19 @@ export default function Home() {
               <p className="pwa-subtitle mb-2">Frecuencia Semanal</p>
               <p className="text-3xl font-black mb-1 tracking-tight">MARTES</p>
               <p className="text-accent-lemon text-sm font-black tracking-widest leading-none">19:00 HS</p>
+            </div>
+          </div>
+
+          {/* Morfi Module */}
+          <div className="pwa-card p-10 flex flex-col justify-between min-h-[400px] bg-white/[0.01]">
+            <div className="flex justify-between items-start">
+              <Utensils className="text-accent-lemon" size={32} />
+              <div className="pwa-pill border-accent-lemon/20 text-accent-lemon">MASTER</div>
+            </div>
+            <div className="mt-8">
+              <p className="pwa-subtitle mb-2">Morfi Master</p>
+              <h3 className="text-4xl font-black mb-1 tracking-tight uppercase italic">{morfiMaster?.name || '---'}</h3>
+              <p className="text-accent-lemon text-sm font-black tracking-widest leading-none">RATIO: {morfiMaster?.morfiRate.toFixed(0)}%</p>
             </div>
           </div>
 

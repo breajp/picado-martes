@@ -7,6 +7,8 @@ export interface PlayerStats {
     totalGames: number;
     winRate: number;
     points: number;
+    morfiGames: number;
+    morfiRate: number;
 }
 
 export function getLeaderboard(year?: number): PlayerStats[] {
@@ -20,7 +22,9 @@ export function getLeaderboard(year?: number): PlayerStats[] {
             losses: 0,
             totalGames: 0,
             winRate: 0,
-            points: 0
+            points: 0,
+            morfiGames: 0,
+            morfiRate: 0
         };
     });
 
@@ -32,8 +36,14 @@ export function getLeaderboard(year?: number): PlayerStats[] {
                     stats[player].points += 3;
                 } else if (result === -1) {
                     stats[player].losses++;
+                    stats[player].points -= 1;
                 }
                 stats[player].totalGames++;
+
+                // Cálculo de Morfi
+                if (match.morfi?.includes(player)) {
+                    stats[player].morfiGames++;
+                }
             }
         });
     });
@@ -41,7 +51,8 @@ export function getLeaderboard(year?: number): PlayerStats[] {
     return Object.values(stats)
         .map(s => ({
             ...s,
-            winRate: s.totalGames > 0 ? (s.wins / s.totalGames) * 100 : 0
+            winRate: s.totalGames > 0 ? (s.wins / s.totalGames) * 100 : 0,
+            morfiRate: s.totalGames > 0 ? (s.morfiGames / s.totalGames) * 100 : 0
         }))
         .filter(s => s.totalGames > 0)
         .sort((a, b) => b.points - a.points || b.winRate - a.winRate);

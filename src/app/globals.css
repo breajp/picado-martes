@@ -9,6 +9,7 @@
     --accent-orange: #ff7e4b;
     --accent-blue: #0070f3;
     --accent-pink: #ff0080;
+    --accent-lemon: #ccff00;
     --glass: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
   }
@@ -94,6 +95,21 @@
 
   .pwa-subtitle {
     @apply text-white/40 font-medium text-sm tracking-wide uppercase;
+  }
+
+  .pwa-input {
+    @apply w-full bg-white/[0.04] border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-accent-orange transition-all font-black italic appearance-none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-alpha='0.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.5rem center;
+    background-size: 1rem;
+  }
+
+  /* Custom styling for date input to hide primitive icons */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.1;
+    cursor: pointer;
   }
 }
 
