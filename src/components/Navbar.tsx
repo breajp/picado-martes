@@ -8,55 +8,30 @@ export default function Navbar() {
     const pathname = usePathname();
 
     const links = [
-        { href: '/', label: 'Journal' },
+        { href: '/', label: 'Home' },
         { href: '/players', label: 'Roster' },
-        { href: '/vs', label: 'Vs Mode' },
+        { href: '/vs', label: 'Matchup' },
         { href: '/admin', label: 'Console' },
     ];
 
     return (
-        <>
-            {/* Desktop Vertical Nav */}
-            <nav className="fixed top-10 left-10 z-[100] hidden lg:block">
-                <Link href="/" className="text-2xl display-bold tracking-tighter text-white mb-12 block">
-                    FTBL<span className="text-accent underline">.</span>SYSTEM
-                </Link>
-
-                <div className="flex flex-col gap-6">
-                    {links.map(({ href, label }) => (
-                        <Link key={href} href={href} className="group relative">
-                            <span className={`text-xs font-black uppercase tracking-[0.4em] transition-all duration-500 ${pathname === href ? 'text-accent pl-4' : 'text-gray-600 group-hover:text-white group-hover:pl-4'}`}>
-                                {label}
-                            </span>
-                            {pathname === href && (
-                                <motion.div
-                                    layoutId="nav-line"
-                                    className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-accent rounded-full"
-                                />
-                            )}
-                        </Link>
-                    ))}
-                </div>
-            </nav>
-
-            {/* Mobile Bottom Nav */}
-            <nav className="fixed bottom-0 left-0 right-0 z-[100] p-6 lg:hidden">
-                <div className="super-glass flex justify-between items-center px-8 py-4 rounded-full">
-                    {links.map(({ href, label }) => (
-                        <Link key={href} href={href} className="relative">
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${pathname === href ? 'text-accent' : 'text-gray-500'}`}>
-                                {label}
-                            </span>
-                            {pathname === href && (
-                                <motion.div
-                                    layoutId="nav-dot-mobile"
-                                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full"
-                                />
-                            )}
-                        </Link>
-                    ))}
-                </div>
-            </nav>
-        </>
+        <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-[500px]">
+            <div className="soft-glass pill-shape px-8 py-5 flex justify-between items-center bg-white/60">
+                {links.map(({ href, label }) => (
+                    <Link key={href} href={href} className="relative px-4">
+                        <span className={`text-[11px] font-black uppercase tracking-widest transition-colors duration-300 ${pathname === href ? 'text-fg' : 'text-gray-400 hover:text-fg'}`}>
+                            {label}
+                        </span>
+                        {pathname === href && (
+                            <motion.div
+                                layoutId="nav-pill"
+                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full"
+                                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                            />
+                        )}
+                    </Link>
+                ))}
+            </div>
+        </nav>
     );
 }

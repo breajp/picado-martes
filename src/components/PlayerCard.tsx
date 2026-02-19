@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { getPlayerMetadata } from '@/data/playerMetadata';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface PlayerCardProps {
@@ -22,61 +21,59 @@ export default function PlayerCard({ name, stats, rank }: PlayerCardProps) {
     return (
         <Link href={`/players/${name}`}>
             <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.02, y: -5 }}
+                whileHover={{ y: -10 }}
                 className="group relative cursor-pointer"
             >
-                <div className="absolute inset-0 bg-accent/10 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <div className="relative z-10 super-glass overflow-hidden h-[500px] flex flex-col">
-                    {/* Header Info */}
-                    <div className="p-6 flex justify-between items-start border-b border-white/5">
-                        <div className="flex flex-col">
-                            <span className="text-[40px] display-bold leading-none text-white/10 italic">#{rank.toString().padStart(2, '0')}</span>
-                            <span className="text-accent text-[10px] font-black tracking-widest uppercase">{metadata.role}</span>
-                        </div>
-                        <div className="text-right">
-                            <span className="block text-[8px] font-black text-gray-500 uppercase tracking-widest mt-1">Nationality</span>
-                            <span className="text-lg font-display text-white italic">{metadata.nationality}</span>
-                        </div>
+                <div className="soft-glass card-shape overflow-hidden flex flex-col h-[520px]">
+                    {/* Rank Badge */}
+                    <div className="absolute top-8 left-8 z-20 bg-white/80 backdrop-blur-md px-4 py-2 pill-shape border border-white shadow-sm font-black text-sm">
+                        #{rank}
                     </div>
 
                     {/* Photo Section */}
-                    <div className="relative flex-1 grayscale group-hover:grayscale-0 transition-all duration-700 overflow-hidden">
+                    <div className="relative h-[65%] w-full overflow-hidden">
                         <img
                             src={metadata.photo}
                             alt={name}
-                            className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-110"
+                            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
+                        {/* Soft Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent opacity-60" />
 
-                        {/* Overlay Title */}
-                        <div className="absolute bottom-6 left-6 right-6">
-                            <h3 className="text-5xl display-bold leading-none group-hover:text-accent transition-colors">
-                                {name}
-                            </h3>
-                            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mt-2">Professional Profile</p>
-                        </div>
+                        {/* Accent Orange Sphere (Pinterest Reference Element) */}
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-accent rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-opacity" />
                     </div>
 
-                    {/* Footer Stats */}
-                    <div className="p-6 grid grid-cols-3 gap-2 bg-white/[0.03]">
-                        <div className="text-center">
-                            <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Efectividad</p>
-                            <p className="text-lg font-display text-accent italic">{stats.winRate.toFixed(0)}%</p>
+                    {/* Info Section */}
+                    <div className="flex-1 p-10 bg-white/40 flex flex-col justify-between">
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                    {metadata.role} • {metadata.nationality}
+                                </span>
+                                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                            </div>
+                            <h3 className="text-4xl font-black tracking-tight text-fg">
+                                {name}
+                            </h3>
                         </div>
-                        <div className="text-center border-x border-white/10">
-                            <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Puntos</p>
-                            <p className="text-lg font-display text-white italic">{stats.points}</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Partidos</p>
-                            <p className="text-lg font-display text-white italic">{stats.totalGames}</p>
+
+                        {/* Quick Stats Grid */}
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Win Rate</p>
+                                <p className="text-2xl font-black text-accent">{stats.winRate.toFixed(0)}%</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Points</p>
+                                <p className="text-2xl font-black">{stats.points}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Shadow Hover Element */}
+                <div className="absolute -inset-2 bg-gradient-to-br from-accent/10 to-transparent rounded-[52px] -z-10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </motion.div>
         </Link>
     );

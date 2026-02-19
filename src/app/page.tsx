@@ -1,106 +1,92 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Leaderboard from '@/components/Leaderboard';
-import { ArrowRight, Trophy, Zap, MapPin } from 'lucide-react';
+import { ArrowRight, Star, Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
-
-  const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-
   return (
-    <main ref={containerRef} className="relative min-h-[200vh]">
+    <main className="min-h-screen relative overflow-hidden page-transition">
+      {/* Background Blobs */}
+      <div className="bg-blobs">
+        <div className="blob blob-1" />
+        <div className="blob blob-2" />
+        <div className="blob blob-3" />
+      </div>
+
       <Navbar />
 
-      {/* SECTION 1: HERO EDITORIAL */}
-      <section className="h-screen flex flex-col justify-end p-6 sm:p-20 relative overflow-hidden">
-        <div className="luxury-grid opacity-30" />
-
-        <motion.div style={{ y: textY }} className="relative z-10 max-w-7xl mx-auto w-full">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4 mb-8"
-          >
-            <span className="w-12 h-px bg-accent" />
-            <span className="text-accent text-sm font-black uppercase tracking-[0.5em]">Season Two • 2025</span>
-          </motion.div>
-
-          <h1 className="text-[12vw] sm:text-[15vw] display-bold leading-none text-gradient mb-12">
-            PROPIEDAD<br />DE LOS<br />MARTES
-          </h1>
-
-          <div className="flex flex-col sm:flex-row justify-between items-end gap-12">
-            <p className="max-w-md text-gray-400 text-lg font-light leading-relaxed">
-              La plataforma definitiva para el seguimiento de rendimiento, rivalidades y estadísticas del fútbol amateur más competitivo.
-            </p>
-
-            <Link href="/players">
-              <button className="magnetic-btn">
-                Explorar Plantel <ArrowRight size={18} />
-              </button>
-            </Link>
-          </div>
+      {/* HERO SECTION */}
+      <section className="pt-40 pb-20 px-6 sm:px-20 max-w-7xl mx-auto flex flex-col items-center text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-accent-soft text-accent px-6 py-2 pill-shape font-black text-xs uppercase tracking-[0.4em] mb-12 border border-accent/20"
+        >
+          Tuesday Football Collective
         </motion.div>
+
+        <h1 className="text-[14vw] sm:text-[10vw] display-text text-gradient mb-12">
+          SOFT<br />STADIUM
+        </h1>
+
+        <p className="max-w-xl text-gray-500 text-xl font-medium leading-relaxed mb-16">
+          Un enfoque refinado para el seguimiento del fútbol amateur. Donde el rendimiento se encuentra con el diseño de vanguardia.
+        </p>
+
+        <Link href="/players">
+          <button className="btn-pill shadow-xl shadow-gray-200 hover:shadow-gray-300">
+            Explore Roster <ArrowRight size={18} className="inline ml-2" />
+          </button>
+        </Link>
       </section>
 
-      {/* SECTION 2: STATS OVERVIEW */}
-      <section className="min-h-screen px-6 py-40 sm:px-20 bg-white/5 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
-            <div className="lg:col-span-4">
-              <h2 className="text-6xl display-bold mb-8">EL<br /><span className="text-accent italic">ESTADO</span><br />DE LA<br />CANCHA</h2>
-              <p className="text-gray-500 font-medium mb-12">Datos en tiempo real sincronizados con cada victoria.</p>
+      {/* STATS HIGHLIGHTS */}
+      <section className="py-20 px-6 sm:px-20 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-              <div className="space-y-6">
-                <div className="super-glass p-8 flex items-center justify-between group">
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-gray-500 mb-1">Última Sede</p>
-                    <p className="text-2xl font-black">GRUN STADIUM</p>
-                  </div>
-                  <MapPin className="text-accent opacity-20 group-hover:opacity-100 transition-opacity" size={32} />
-                </div>
-                <div className="super-glass p-8 flex items-center justify-between group border-accent/20">
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-gray-500 mb-1">MVP de la Semana</p>
-                    <p className="text-2xl font-black text-accent">DIEGO BREA</p>
-                  </div>
-                  <Trophy className="text-accent" size={32} />
-                </div>
+          <div className="flex flex-col gap-12">
+            <motion.div
+              whileHover={{ scale: 0.98 }}
+              className="soft-glass card-shape p-16 bg-white/70 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-12 opacity-10">
+                <Star size={120} className="fill-accent text-accent" />
               </div>
-            </div>
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">Player of the Month</p>
+              <h2 className="text-6xl font-black mb-4">DIEGO</h2>
+              <p className="text-gray-500 font-medium">Liderando con una efectividad del 78% este trimestre.</p>
+            </motion.div>
 
-            <div className="lg:col-span-8">
-              <div className="flex justify-between items-end mb-12">
-                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-accent">Global Leaderboard</h3>
-                <Link href="/vs" className="text-xs font-bold text-gray-500 hover:text-white transition-colors">Ver Comparativo →</Link>
+            <div className="grid grid-cols-2 gap-8">
+              <div className="soft-glass card-shape p-10 bg-accent text-white border-none shadow-xl shadow-accent/20">
+                <Calendar className="mb-6" />
+                <h3 className="text-2xl font-black leading-tight">NEXT<br />GAME</h3>
+                <p className="mt-4 text-[10px] font-black uppercase opacity-60">Tuesday 21:00</p>
               </div>
-              <div className="super-glass overflow-hidden">
-                <Leaderboard />
+              <div className="soft-glass card-shape p-10 bg-white/40">
+                <MapPin className="mb-6 text-accent" />
+                <h3 className="text-2xl font-black leading-tight">GRUN<br />CLUB</h3>
+                <p className="mt-4 text-[10px] font-black uppercase text-gray-400">Amsterdam 12B</p>
               </div>
             </div>
           </div>
+
+          <div className="soft-glass card-shape px-4 py-8 bg-white/40">
+            <div className="px-12 py-8 flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-black">LEADERBOARD</h3>
+              <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Global Standings</span>
+            </div>
+            <Leaderboard />
+          </div>
+
         </div>
       </section>
 
-      <footer className="h-screen flex flex-col items-center justify-center text-center p-20">
-        <h2 className="text-[10vw] display-bold text-white/5 absolute pointer-events-none">FOOTBALL CLUB</h2>
-        <div className="relative z-10">
-          <p className="text-gray-600 font-black uppercase tracking-[1em] text-[10px] mb-8">Designed for the boys</p>
-          <div className="flex gap-4">
-            <div className="w-12 h-px bg-white/10" />
-            <Zap className="text-accent" />
-            <div className="w-12 h-px bg-white/10" />
-          </div>
-        </div>
+      <footer className="py-20 text-center">
+        <p className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-300">© 2026 Soft Stadium Collective</p>
       </footer>
     </main>
   );
