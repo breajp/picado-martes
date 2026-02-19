@@ -27,8 +27,8 @@ export default function PlayersPage() {
                         animate={{ opacity: 1, x: 0 }}
                     >
                         <p className="pwa-subtitle mb-4">Base de Datos Táctica</p>
-                        <h1 className="pwa-title mb-0">
-                            PLANTEL<br /><span className="text-white/20">OPERATIVO</span>
+                        <h1 className="pwa-title mb-6">
+                            FULBITO<br /><span className="text-white/20">FOR EVER</span>
                         </h1>
                     </motion.div>
 

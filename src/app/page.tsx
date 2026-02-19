@@ -50,8 +50,8 @@ export default function Home() {
               FULBITO 4 EVER // TEMPORADA {year}
             </div>
             <h1 className="pwa-title">
-              RENDIMIENTO<br />
-              <span className="text-white/20">OPERATIVO</span>
+              FULBITO<br />
+              <span className="text-white/20">FOR EVER</span>
             </h1>
             <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between mt-8">
               <p className="max-w-md text-white/50 text-base leading-relaxed">
@@ -106,7 +106,7 @@ export default function Home() {
             <div className="mt-8">
               <p className="pwa-subtitle mb-2">Frecuencia Semanal</p>
               <p className="text-3xl font-black mb-1 tracking-tight">MARTES</p>
-              <p className="text-accent-lemon text-sm font-black tracking-widest leading-none">21:00 HS</p>
+              <p className="text-accent-lemon text-sm font-black tracking-widest leading-none">19:00 HS</p>
             </div>
           </div>
 

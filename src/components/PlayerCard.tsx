@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import Link from 'next/link';
@@ -18,6 +19,12 @@ interface PlayerCardProps {
 
 export default function PlayerCard({ name, rank, stats }: PlayerCardProps) {
     const metadata = getPlayerMetadata(name);
+    const [displayPhoto, setDisplayPhoto] = useState(metadata.photo);
+
+    useEffect(() => {
+        const custom = localStorage.getItem(`photo_${name}`);
+        if (custom) setDisplayPhoto(custom);
+    }, [name]);
 
     return (
         <Link href={`/players/${name}`}>
@@ -28,7 +35,7 @@ export default function PlayerCard({ name, rank, stats }: PlayerCardProps) {
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
                     <img
-                        src={metadata.photo}
+                        src={displayPhoto}
                         alt={name}
                         className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110 opacity-40 group-hover:opacity-60"
                     />

@@ -1,22 +1,42 @@
 'use client';
 
-import { use, useMemo, useState } from 'react';
+import { use, useMemo, useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Activity, Target, Zap, Shield } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera } from 'lucide-react';
 import Link from 'next/link';
 import PerformanceChart from '@/components/PerformanceChart';
 
 export default function PlayerProfile({ params }: { params: Promise<{ name: string }> }) {
     const { name } = use(params);
     const [year, setYear] = useState<number>(2025);
+    const [displayPhoto, setDisplayPhoto] = useState<string>("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const leaderboard = getLeaderboard(year);
     const playerStats = leaderboard.find(p => p.name === name);
     const metadata = getPlayerMetadata(name);
     const history = useMemo(() => getPlayerHistory(name, year), [name, year]);
+
+    useEffect(() => {
+        const custom = localStorage.getItem(`photo_${name}`);
+        setDisplayPhoto(custom || metadata.photo);
+    }, [name, metadata.photo]);
+
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result as string;
+                localStorage.setItem(`photo_${name}`, base64);
+                setDisplayPhoto(base64);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     return (
         <main className="min-h-screen relative pb-40">
@@ -29,14 +49,31 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
             </div>
 
             {/* MOBILE-FIRST HEADER */}
-            <section className="relative h-[65vh] flex items-end p-6 sm:p-12 overflow-hidden">
+            <section className="relative h-[65vh] flex items-end p-6 sm:p-12 overflow-hidden group">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src={metadata.photo}
+                        src={displayPhoto}
                         alt={name}
                         className="w-full h-full object-cover grayscale opacity-50 transition-all duration-1000"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-transparent" />
+                </div>
+
+                {/* Upload Button Overlay */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-sm">
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all scale-95 hover:scale-100"
+                    >
+                        <Camera size={18} /> Cambiar Foto de Perfil
+                    </button>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                        accept="image/*"
+                    />
                 </div>
 
                 <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start">
