@@ -1,26 +1,48 @@
+'use client';
+
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Trophy, Users, Swords, Settings, LogIn } from 'lucide-react';
 
 export default function Navbar() {
+    const pathname = usePathname();
+
+    const links = [
+        { href: '/', label: 'Tabla', icon: Trophy },
+        { href: '/players', label: 'Plantel', icon: Users },
+        { href: '/vs', label: 'Duelos', icon: Swords },
+        { href: '/admin', label: 'Panel', icon: Settings },
+    ];
+
     return (
-        <nav className="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-            <Link href="/" className="text-xl font-bold tracking-tighter title-gradient">
-                MARTES DE FÚTBOL
+        <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-2xl px-4 py-3 glass-card rounded-full flex justify-between items-center sm:px-8">
+            <Link href="/" className="text-xl font-black tracking-tighter text-glow sm:text-2xl">
+                MARTES<span className="text-primary">.FTBL</span>
             </Link>
-            <div className="flex gap-6 items-center">
-                <Link href="/players" className="text-sm font-medium hover:text-primary transition-colors">
-                    Jugadores
-                </Link>
-                <Link href="/stats" className="text-sm font-medium hover:text-primary transition-colors">
-                    Estadísticas
-                </Link>
-                <Link href="/vs" className="text-sm font-medium hover:text-primary transition-colors">
-                    VS
-                </Link>
-                <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors">
-                    Admin
-                </Link>
-                <button className="bg-primary hover:bg-emerald-600 text-black px-4 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105">
-                    Login
+
+            <div className="flex items-center gap-1 sm:gap-4">
+                {links.map(({ href, label, icon: Icon }) => (
+                    <Link key={href} href={href} className="relative px-3 py-2 rounded-full transition-colors hover:bg-white/5 group">
+                        <span className={`hidden sm:inline text-xs font-bold uppercase tracking-wider ${pathname === href ? 'text-primary' : 'text-gray-400'}`}>
+                            {label}
+                        </span>
+                        <Icon className={`sm:hidden w-5 h-5 ${pathname === href ? 'text-primary' : 'text-gray-400'}`} />
+                        {pathname === href && (
+                            <motion.div
+                                layoutId="nav-pill"
+                                className="absolute inset-0 bg-primary/10 rounded-full -z-10 border border-primary/20"
+                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                        )}
+                    </Link>
+                ))}
+
+                <div className="w-px h-4 bg-white/10 mx-2 hidden sm:block" />
+
+                <button className="flex items-center gap-2 bg-primary text-black px-4 py-2 rounded-full text-xs font-black uppercase hover:scale-105 transition-all">
+                    <LogIn size={14} />
+                    <span className="hidden sm:inline">Login</span>
                 </button>
             </div>
         </nav>
