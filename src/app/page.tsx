@@ -8,188 +8,159 @@ import {
   Users,
   History,
   Zap,
-  LayoutDashboard,
-  ChevronRight,
+  Search,
+  ChevronDown,
   Star,
-  Activity,
-  Calendar
+  Settings
 } from 'lucide-react';
 import Link from 'next/link';
-import { getGlobalStats } from '@/lib/stats';
+import { getGlobalStats, getLeaderboard } from '@/lib/stats';
 
 export default function Home() {
   const year = 2025;
   const stats = useMemo(() => getGlobalStats(year), [year]);
+  const leaderboard = useMemo(() => getLeaderboard(year), [year]);
 
-  const worlds = [
-    {
-      title: 'Ranking Anual',
-      subtitle: 'La tabla de posiciones',
-      href: '/leaderboard',
-      icon: Trophy,
-      color: 'text-accent-orange',
-      bg: 'bg-accent-orange/10',
-      border: 'border-accent-orange/20'
-    },
-    {
-      title: 'El Plantel',
-      subtitle: 'Perfiles e hitos',
-      href: '/players',
-      icon: Users,
-      color: 'text-accent-blue',
-      bg: 'bg-accent-blue/10',
-      border: 'border-accent-blue/20'
-    },
-    {
-      title: 'Modo Versus',
-      subtitle: 'Duelos Cara a Cara',
-      href: '/vs',
-      icon: Zap,
-      color: 'text-accent-lemon',
-      bg: 'bg-accent-lemon/10',
-      border: 'border-accent-lemon/20'
-    },
-    {
-      title: 'Historial',
-      subtitle: 'Registro de Martes',
-      href: '/history',
-      icon: History,
-      color: 'text-white/40',
-      bg: 'bg-white/5',
-      border: 'border-white/10'
-    },
+  const mainActions = [
+    { title: 'Ranking', icon: Trophy, color: 'bg-orange-500', href: '/leaderboard' },
+    { title: 'Plantel', icon: Users, color: 'bg-blue-500', href: '/players' },
+    { title: 'Duelos', icon: Zap, color: 'bg-yellow-400', href: '/vs' },
+    { title: 'Historial', icon: History, color: 'bg-zinc-600', href: '/history' },
   ];
 
   return (
-    <main className="min-h-screen relative pb-80">
-      {/* Background Orbs */}
-      <div className="pwa-mesh fixed inset-0">
-        <div className="mesh-orb-1 opacity-20" />
-        <div className="mesh-orb-2 opacity-20" />
-      </div>
-
-      <Navbar />
-
-      <div className="relative z-10 px-6 sm:px-12 pt-20 max-w-7xl mx-auto">
-
-        {/* HEADER AREA */}
-        <header className="flex justify-between items-center mb-12">
-          <div>
-            <motion.p
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="pwa-subtitle mb-2"
-            >
-              ¡BIENVENIDO, CAMPEÓN!
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-4xl font-black italic uppercase tracking-tighter"
-            >
-              FULBITO 4 EVER
-            </motion.h1>
+    <main className="min-h-screen bg-[#0A0A0A] text-white pb-32">
+      {/* APP TOP BAR */}
+      <header className="px-6 pt-14 pb-4 bg-[#0A0A0A] sticky top-0 z-50">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col">
+            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Sede Central</p>
+            <div className="flex items-center gap-1 group cursor-pointer">
+              <span className="text-sm font-black italic uppercase">Grun Club, Núñez</span>
+              <ChevronDown size={14} className="text-white/40 group-hover:text-white transition-all" />
+            </div>
           </div>
           <Link href="/admin">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all cursor-pointer">
-              <LayoutDashboard size={20} className="text-white/40" />
+            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <Settings size={18} className="text-white/60" />
             </div>
           </Link>
-        </header>
+        </div>
 
-        {/* FEATURED SEASON CARD */}
-        <section className="mb-12">
+        {/* MOCK SEARCH BAR */}
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <Search size={18} className="text-white/20 group-focus-within:text-accent-orange transition-colors" />
+          </div>
+          <input
+            type="text"
+            placeholder='Buscar jugador, fecha o "morfi"...'
+            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-accent-orange/50 transition-all placeholder:text-white/10"
+          />
+        </div>
+      </header>
+
+      <div className="px-6 space-y-8 overflow-x-hidden">
+
+        {/* MAIN HERO CARD (Featured Player) */}
+        <section>
           <motion.div
-            whileHover={{ scale: 0.99 }}
-            className="pwa-card p-10 bg-gradient-to-br from-white/[0.03] to-transparent border-white/10 relative overflow-hidden flex flex-col md:flex-row gap-12 items-center"
+            whileTap={{ scale: 0.98 }}
+            className="pwa-card p-8 bg-gradient-to-br from-accent-orange/20 to-transparent border-accent-orange/10 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent-orange/10 blur-[100px] -z-10" />
-
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-6">
-                <Star size={16} className="text-accent-orange fill-accent-orange" />
-                <span className="text-[10px] font-black tracking-widest uppercase text-accent-orange">Temporada {year}</span>
-              </div>
-              <h2 className="text-5xl font-black italic uppercase tracking-tighter mb-4 leading-none">
-                EL REINO DE<br />
-                <span className="text-accent-orange">{stats.topPlayer?.name || '---'}</span>
-              </h2>
-              <p className="text-white/40 text-xs font-bold leading-relaxed max-w-md">
-                Dominando la cima con un ratio de victoria del {stats.topPlayer?.winRate.toFixed(0)}%.
-                Quedan {31 - stats.totalMatches} fechas para que termine el calendario oficial.
-              </p>
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent-orange/20 blur-[60px]" />
+            <div className="flex items-center gap-2 mb-4">
+              <Star size={12} className="text-accent-orange fill-accent-orange" />
+              <span className="text-[10px] font-black tracking-widest uppercase text-accent-orange">MVP DE LA SEMANA</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-              <div className="p-6 rounded-[32px] bg-white/5 border border-white/5 min-w-[140px]">
-                <Activity size={20} className="text-accent-blue mb-4" />
-                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Partidos</p>
-                <h4 className="text-2xl font-black italic text-accent-blue">{stats.totalMatches}</h4>
+            <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">
+              {stats.topPlayer?.name}
+            </h2>
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col">
+                <span className="text-[9px] text-white/30 font-bold uppercase">Victoria</span>
+                <span className="text-lg font-black italic text-accent-orange">{stats.topPlayer?.winRate.toFixed(0)}%</span>
               </div>
-              <div className="p-6 rounded-[32px] bg-white/5 border border-white/5 min-w-[140px]">
-                <Calendar size={20} className="text-accent-lemon mb-4" />
-                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Día Fijo</p>
-                <h4 className="text-2xl font-black italic text-accent-lemon">MARTES</h4>
+              <div className="w-[1px] h-8 bg-white/10" />
+              <div className="flex flex-col">
+                <span className="text-[9px] text-white/30 font-bold uppercase">Puntos</span>
+                <span className="text-lg font-black italic">{stats.topPlayer?.points}</span>
               </div>
             </div>
           </motion.div>
         </section>
 
-        {/* NAVIGATION WORLDS */}
-        <section className="mb-12">
-          <h3 className="text-[10px] font-black text-white/20 tracking-[0.4em] uppercase mb-8">Explorar el Ecosistema</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {worlds.map((world, i) => (
-              <Link key={world.title} href={world.href}>
+        {/* QUICK ACTIONS GRID */}
+        <section>
+          <div className="grid grid-cols-2 gap-4">
+            {mainActions.map((action, i) => (
+              <Link key={action.title} href={action.href} className="block">
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -5 }}
-                  className={`pwa-card p-8 group relative overflow-hidden h-full flex flex-col justify-between min-h-[180px] cursor-pointer ${world.bg} ${world.border}`}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-white/5 border border-white/5 rounded-[32px] p-6 flex flex-col items-center gap-3 transition-all active:bg-white/10"
                 >
-                  <div className="flex justify-between items-start">
-                    <world.icon className={`${world.color}`} size={28} />
-                    <ChevronRight size={16} className="text-white/10 group-hover:translate-x-1 group-hover:text-white transition-all" />
+                  <div className={`${action.color} w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20`}>
+                    <action.icon size={24} className="text-black" />
                   </div>
-                  <div>
-                    <h4 className="text-xl font-black italic uppercase tracking-tighter mb-1">{world.title}</h4>
-                    <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{world.subtitle}</p>
-                  </div>
+                  <span className="text-xs font-black italic uppercase tracking-wider">{action.title}</span>
                 </motion.div>
               </Link>
             ))}
           </div>
         </section>
 
-        {/* QUICK STATS ROW */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="pwa-card p-8 bg-white/[0.01] border-white/5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Morfi Master</p>
-              <h5 className="text-2xl font-black italic uppercase italic">{stats.morfiMaster?.name}</h5>
-            </div>
-            <div className="text-right">
-              <p className="text-[20px] font-black text-accent-lemon italic">{stats.morfiMaster?.morfiRate.toFixed(0)}%</p>
-              <p className="text-[8px] font-bold text-white/10 uppercase tracking-widest">Rate Semanal</p>
-            </div>
+        {/* HORIZONTAL PLAYERS SCROLL (Favorite stores style) */}
+        <section>
+          <div className="flex justify-between items-end mb-4 px-1">
+            <h3 className="text-sm font-black italic uppercase tracking-widest text-white/40">Los más pesados</h3>
+            <Link href="/players" className="text-[10px] font-bold text-accent-orange uppercase tracking-widest">Ver todos</Link>
           </div>
-          <div className="pwa-card p-8 bg-white/[0.01] border-white/5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Plantel Total</p>
-              <h5 className="text-2xl font-black italic uppercase italic">{stats.playerCount} Jugadores</h5>
-            </div>
-            <div className="text-right">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-white/10 border-2 border-bg" />
-                ))}
-              </div>
-            </div>
+          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6">
+            {leaderboard.slice(0, 8).map((player, i) => (
+              <Link key={player.name} href={`/players/${player.name}`}>
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className="flex flex-col items-center gap-3 min-w-[80px]"
+                >
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-b from-white/10 to-transparent border border-white/5 flex items-center justify-center relative overflow-hidden">
+                    <span className="text-2xl font-black italic text-white/20 uppercase">{player.name[0]}</span>
+                    {i < 3 && (
+                      <div className="absolute top-1 right-1 w-5 h-5 bg-accent-orange rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                        <span className="text-[8px] font-black text-black">{i + 1}</span>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-black italic uppercase truncate w-20 text-center">{player.name}</span>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* SEASON TICKER (App stats style) */}
+        <section className="bg-white/[0.02] border border-white/5 rounded-[40px] p-8 flex justify-around">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[10px] font-bold text-white/20 uppercase">Fechas</span>
+            <span className="text-2xl font-black italic">{stats.totalMatches}</span>
+          </div>
+          <div className="w-[1px] h-10 bg-white/5" />
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[10px] font-bold text-white/20 uppercase">Morfi</span>
+            <span className="text-2xl font-black italic text-accent-lemon">{stats.morfiMaster?.name.split(' ')[0]}</span>
+          </div>
+          <div className="w-[1px] h-10 bg-white/5" />
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[10px] font-bold text-white/20 uppercase">Sede</span>
+            <span className="text-2xl font-black italic">GRUN</span>
           </div>
         </section>
 
       </div>
+
+      <Navbar />
     </main>
   );
 }
