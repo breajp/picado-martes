@@ -24,6 +24,11 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
 
     useEffect(() => {
         async function fetchPhoto() {
+            if (!supabase) {
+                setDisplayPhoto(metadata.photo);
+                return;
+            }
+
             const { data, error } = await supabase
                 .from('player_profiles')
                 .select('photo_url')
