@@ -9,31 +9,29 @@ export default function PlayersPage() {
     const stats = getLeaderboard();
 
     return (
-        <main className="min-h-screen relative pb-20">
-            <div className="bg-stadium" />
-            <div className="bg-mesh" />
+        <main className="min-h-screen relative pb-60">
             <Navbar />
 
-            <div className="max-w-7xl mx-auto px-6 pt-40">
-                <header className="mb-20 text-center sm:text-left">
+            <section className="pt-32 pb-20 px-6 sm:px-12 max-w-7xl mx-auto">
+                <header className="mb-24">
                     <motion.h1
-                        initial={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="text-6xl font-black title-hero mb-4"
+                        className="title-huge mb-6"
                     >
-                        GLADIADORES
+                        ACTIVE<br /><span className="text-white/20">ROSTER</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="text-gray-400 text-lg font-light tracking-wide"
+                        className="subtitle max-w-xl"
                     >
-                        Fichas técnicas y rendimiento histórico de los protagonistas del martes.
+                        Listado completo de gladiadores registrados para la temporada 2025.
                     </motion.p>
                 </header>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 sm:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
                     {stats.map((player, index) => (
                         <motion.div
                             key={player.name}
@@ -55,7 +53,7 @@ export default function PlayersPage() {
                         </motion.div>
                     ))}
                 </div>
-            </div>
+            </section>
         </main>
     );
 }

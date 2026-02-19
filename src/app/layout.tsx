@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
-import Cursor from "@/components/Cursor";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
-  title: "MARTES FTBL | Official App",
-  description: "Estadísticas, equipos aleatorios y seguimiento de victorias para el picado de fútbol de los martes.",
+  title: "FTBL.APP | Premium Match Tracker",
+  description: "Advanced performance diagnostics and match tracking for elite amateurs.",
 };
 
 export default function RootLayout({
@@ -25,10 +19,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <div className="noise-overlay" />
-        <div className="luxury-bg" />
-        <Cursor />
+      <body className={`${outfit.variable} font-sans`}>
+        <div className="scene-bg">
+          <div className="glow-blob blob-pink" />
+          <div className="glow-blob blob-blue" />
+          <div className="glow-blob blob-lemon" />
+        </div>
         {children}
       </body>
     </html>

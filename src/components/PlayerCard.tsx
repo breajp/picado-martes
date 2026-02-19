@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 
 interface PlayerCardProps {
     name: string;
@@ -21,59 +22,50 @@ export default function PlayerCard({ name, stats, rank }: PlayerCardProps) {
     return (
         <Link href={`/players/${name}`}>
             <motion.div
-                whileHover={{ y: -10 }}
+                whileHover={{ scale: 0.98 }}
                 className="group relative cursor-pointer"
             >
-                <div className="soft-glass card-shape overflow-hidden flex flex-col h-[520px]">
-                    {/* Rank Badge */}
-                    <div className="absolute top-8 left-8 z-20 bg-white/80 backdrop-blur-md px-4 py-2 pill-shape border border-white shadow-sm font-black text-sm">
-                        #{rank}
+                <div className="glass-card overflow-hidden h-[580px] flex flex-col relative">
+                    {/* Header */}
+                    <div className="p-8 pb-0 flex justify-between items-start z-10">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-4xl font-black text-white/10 italic">#{rank.toString().padStart(2, '0')}</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{metadata.role}</span>
+                        </div>
+                        <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                            <ArrowUpRight size={18} />
+                        </div>
                     </div>
 
-                    {/* Photo Section */}
-                    <div className="relative h-[65%] w-full overflow-hidden">
+                    {/* Image */}
+                    <div className="flex-1 relative mt-4 overflow-hidden mask-fade-bottom">
                         <img
                             src={metadata.photo}
                             alt={name}
-                            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
                         />
-                        {/* Soft Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent opacity-60" />
-
-                        {/* Accent Orange Sphere (Pinterest Reference Element) */}
-                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-accent rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-opacity" />
+                        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
                     </div>
 
-                    {/* Info Section */}
-                    <div className="flex-1 p-10 bg-white/40 flex flex-col justify-between">
-                        <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                    {metadata.role} • {metadata.nationality}
-                                </span>
-                                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                            </div>
-                            <h3 className="text-4xl font-black tracking-tight text-fg">
-                                {name}
-                            </h3>
-                        </div>
+                    {/* Stats & Name */}
+                    <div className="p-10 pt-0 z-10">
+                        <h3 className="text-5xl font-black tracking-tighter mb-8 leading-none">{name}</h3>
 
-                        {/* Quick Stats Grid */}
-                        <div className="flex justify-between items-end">
+                        <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
                             <div>
-                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Win Rate</p>
-                                <p className="text-2xl font-black text-accent">{stats.winRate.toFixed(0)}%</p>
+                                <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Efficacy</p>
+                                <p className="text-3xl font-black leading-none">{stats.winRate.toFixed(0)}%</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Points</p>
-                                <p className="text-2xl font-black">{stats.points}</p>
+                                <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Score</p>
+                                <p className="text-3xl font-black leading-none">{stats.points}</p>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Shadow Hover Element */}
-                <div className="absolute -inset-2 bg-gradient-to-br from-accent/10 to-transparent rounded-[52px] -z-10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Accents Pink/Lemon Glow (based on layout metadata) */}
+                    <div className={`absolute top-0 right-0 w-32 h-32 blur-[80px] opacity-20 -z-10 bg-accent-${rank % 2 === 0 ? 'pink' : 'lemon'}`} />
+                </div>
             </motion.div>
         </Link>
     );

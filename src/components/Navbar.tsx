@@ -8,25 +8,25 @@ export default function Navbar() {
     const pathname = usePathname();
 
     const links = [
-        { href: '/', label: 'Home' },
+        { href: '/', label: 'Journal' },
         { href: '/players', label: 'Roster' },
-        { href: '/vs', label: 'Matchup' },
+        { href: '/vs', label: 'VS Mode' },
         { href: '/admin', label: 'Console' },
     ];
 
     return (
-        <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-[500px]">
-            <div className="soft-glass pill-shape px-8 py-5 flex justify-between items-center bg-white/60">
+        <nav className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-[440px]">
+            <div className="glass-pill px-8 py-5 flex justify-between items-center text-white/50">
                 {links.map(({ href, label }) => (
-                    <Link key={href} href={href} className="relative px-4">
-                        <span className={`text-[11px] font-black uppercase tracking-widest transition-colors duration-300 ${pathname === href ? 'text-fg' : 'text-gray-400 hover:text-fg'}`}>
+                    <Link key={href} href={href} className="relative px-3 py-1">
+                        <span className={`text-xs font-semibold tracking-wide transition-all duration-300 ${pathname === href ? 'text-white' : 'hover:text-white'}`}>
                             {label}
                         </span>
                         {pathname === href && (
                             <motion.div
                                 layoutId="nav-pill"
-                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full"
-                                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                className="absolute inset-0 bg-white/10 rounded-full -z-10"
+                                transition={{ type: "spring", stiffness: 350, damping: 30 }}
                             />
                         )}
                     </Link>
