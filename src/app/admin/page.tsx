@@ -10,22 +10,19 @@ export default function AdminPage() {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [team1, setTeam1] = useState<string[]>([]);
     const [team2, setTeam2] = useState<string[]>([]);
-    const [score1, setScore1] = useState(0);
-    const [score2, setScore2] = useState(0);
+    const [winner, setWinner] = useState<'blancos' | 'negros' | null>(null);
 
-    const togglePlayer = (name: string, team: 1 | 2) => {
-        if (team === 1) {
-            if (team1.includes(name)) setTeam1(team1.filter(p => p !== name));
-            else {
-                setTeam1([...team1, name]);
-                setTeam2(team2.filter(p => p !== name));
-            }
+    const cyclePlayerTeam = (name: string) => {
+        if (team1.includes(name)) {
+            // Estaba en Blanco -> Mover a Negro
+            setTeam1(team1.filter(p => p !== name));
+            setTeam2([...team2, name]);
+        } else if (team2.includes(name)) {
+            // Estaba en Negro -> Limpiar
+            setTeam2(team2.filter(p => p !== name));
         } else {
-            if (team2.includes(name)) setTeam2(team2.filter(p => p !== name));
-            else {
-                setTeam2([...team2, name]);
-                setTeam1(team1.filter(p => p !== name));
-            }
+            // Estaba en Banco -> Mover a Blanco
+            setTeam1([...team1, name]);
         }
     };
 
@@ -54,8 +51,8 @@ export default function AdminPage() {
                                 <h2 className="text-2xl font-black italic uppercase">Nuevo Registro de Partido</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                <div className="space-y-6">
+                            <div className="flex flex-col md:flex-row gap-12 items-end">
+                                <div className="space-y-6 w-full md:max-w-[220px]">
                                     <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Fecha del Encuentro</label>
                                     <input
                                         type="date"
@@ -65,24 +62,21 @@ export default function AdminPage() {
                                     />
                                 </div>
 
-                                <div className="flex gap-6">
-                                    <div className="flex-1 space-y-6">
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Goles Blancos</label>
-                                        <input
-                                            type="number"
-                                            value={score1}
-                                            onChange={(e) => setScore1(parseInt(e.target.value))}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-center text-4xl font-black italic"
-                                        />
-                                    </div>
-                                    <div className="flex-1 space-y-6">
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Goles Negros</label>
-                                        <input
-                                            type="number"
-                                            value={score2}
-                                            onChange={(e) => setScore2(parseInt(e.target.value))}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-center text-4xl font-black italic"
-                                        />
+                                <div className="space-y-6 flex-1">
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Resultado del Partido</label>
+                                    <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/10 w-fit">
+                                        <button
+                                            onClick={() => setWinner('blancos')}
+                                            className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all ${winner === 'blancos' ? 'bg-accent-orange text-black' : 'text-white/40 hover:text-white'}`}
+                                        >
+                                            Gana Blanco
+                                        </button>
+                                        <button
+                                            onClick={() => setWinner('negros')}
+                                            className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all ${winner === 'negros' ? 'bg-accent-blue text-white' : 'text-white/40 hover:text-white'}`}
+                                        >
+                                            Gana Negro
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -95,10 +89,10 @@ export default function AdminPage() {
                                 {PLAYERS.map(player => (
                                     <button
                                         key={player}
-                                        onClick={() => togglePlayer(player, team1.includes(player) ? 2 : 1)}
+                                        onClick={() => cyclePlayerTeam(player)}
                                         className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 ${team1.includes(player) ? 'bg-accent-orange/20 border-accent-orange text-white' :
-                                                team2.includes(player) ? 'bg-accent-blue/20 border-accent-blue text-white' :
-                                                    'bg-white/5 border-white/10 text-white/40 hover:border-white/20'
+                                            team2.includes(player) ? 'bg-accent-blue/20 border-accent-blue text-white' :
+                                                'bg-white/5 border-white/10 text-white/40 hover:border-white/20'
                                             }`}
                                     >
                                         <span className="text-xs font-black uppercase italic">{player}</span>
