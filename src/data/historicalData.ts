@@ -13,6 +13,7 @@ export const PLAYERS = [
     "CHIRO", "CHIQUI", "JR MOSQ", "FLORO", "FELO", "JUANI", "PEPI"
 ];
 
+// --- REPRODUCTOR DE DATOS HISTÓRICOS ---
 export const HISTORICAL_MATCHES: MatchResult[] = [
     // --- 2024 ---
     { date: "11/6", year: 2024, location: "Grun", results: { BARQUI: -1, CANA: 1, CHALO: -1, COYO: 1, FAUSTI: 1, JUANI: 1, KQRI: -1, "NICO B": -1, OBI: -1, POCHO: 1 } },
