@@ -106,14 +106,6 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
 
                 {/* Upload Button Overlay */}
                 <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-sm">
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 disabled:opacity-50"
-                    >
-                        {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-                        {uploading ? 'Subiendo...' : 'Cambiar Foto de Perfil'}
-                    </button>
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -121,6 +113,18 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                         className="hidden"
                         accept="image/*"
                     />
+                    <button
+                        type="button"
+                        onClick={() => {
+                            console.log("Opening file picker...");
+                            fileInputRef.current?.click();
+                        }}
+                        disabled={uploading}
+                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 disabled:opacity-50"
+                    >
+                        {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                        {uploading ? 'Subiendo...' : 'Cambiar Foto de Perfil'}
+                    </button>
                 </div>
 
                 <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start">
