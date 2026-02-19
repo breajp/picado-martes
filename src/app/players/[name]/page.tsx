@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils, Plus } from 'lucide-react';
 import Link from 'next/link';
 import PerformanceChart from '@/components/PerformanceChart';
 import { supabase } from '@/lib/supabase';
@@ -17,32 +17,96 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [highlights, setHighlights] = useState<{ id: string, video_url: string, caption: string }[]>([]);
+    const [videoUploading, setVideoUploading] = useState(false);
+    const videoInputRef = useRef<HTMLInputElement>(null);
+
     const leaderboard = getLeaderboard(year);
     const playerStats = leaderboard.find(p => p.name === name);
     const metadata = getPlayerMetadata(name);
     const history = useMemo(() => getPlayerHistory(name, year), [name, year]);
 
     useEffect(() => {
-        async function fetchPhoto() {
+        async function fetchData() {
             if (!supabase) {
                 setDisplayPhoto(metadata.photo);
                 return;
             }
 
-            const { data, error } = await supabase
+            // Photo
+            const { data: photoData } = await supabase
                 .from('player_profiles')
                 .select('photo_url')
                 .eq('name', name)
                 .single();
 
-            if (data?.photo_url) {
-                setDisplayPhoto(data.photo_url);
+            if (photoData?.photo_url) {
+                setDisplayPhoto(photoData.photo_url);
             } else {
                 setDisplayPhoto(metadata.photo);
             }
+
+            // Highlights
+            const { data: videoData } = await supabase
+                .from('player_highlights')
+                .select('*')
+                .eq('player_name', name)
+                .order('created_at', { ascending: false });
+
+            if (videoData) {
+                setHighlights(videoData);
+            }
         }
-        fetchPhoto();
+        fetchData();
     }, [name, metadata.photo]);
+
+    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !supabase) return;
+
+        try {
+            setVideoUploading(true);
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${name}-highlight-${Date.now()}.${fileExt}`;
+            const filePath = `highlights/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('player-highlights')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('player-highlights')
+                .getPublicUrl(filePath);
+
+            const { error: dbError } = await supabase
+                .from('player_highlights')
+                .insert({
+                    player_name: name,
+                    video_url: publicUrl,
+                    caption: `Jugada destacada de ${name}`
+                });
+
+            if (dbError) throw dbError;
+
+            // Update local state
+            const { data: newHighlight } = await supabase
+                .from('player_highlights')
+                .select('*')
+                .eq('player_name', name)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (newHighlight) setHighlights([newHighlight, ...highlights]);
+        } catch (error) {
+            console.error('Error uploading video:', error);
+            alert('Error al subir video. Asegúrate de tener el bucket "player-highlights" creado en Supabase.');
+        } finally {
+            setVideoUploading(false);
+        }
+    };
 
     const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -200,6 +264,67 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                             <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats ? playerStats.morfiRate.toFixed(0) : '0'}%</h4>
                         </div>
                     </div>
+                </div>
+
+                {/* HIGHLIGHTS SECTION */}
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 className="text-2xl font-black italic uppercase tracking-tighter">Jugadas Destacadas</h3>
+                            <p className="pwa-subtitle">The Best of {name}</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <input
+                                type="file"
+                                ref={videoInputRef}
+                                onChange={handleVideoUpload}
+                                className="hidden"
+                                accept="video/*"
+                            />
+                            <button
+                                onClick={() => videoInputRef.current?.click()}
+                                disabled={videoUploading}
+                                className="bg-accent-lemon hover:scale-105 transition-transform text-black px-6 py-3 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {videoUploading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                                {videoUploading ? 'SUBIENDO...' : 'SUBIR JUGADA'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {highlights.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {highlights.map((h, i) => (
+                                <motion.div
+                                    key={h.id}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="pwa-card !p-0 !rounded-[32px] overflow-hidden group"
+                                >
+                                    <div className="aspect-[9/16] relative bg-black/40">
+                                        <video
+                                            src={h.video_url}
+                                            className="w-full h-full object-cover"
+                                            controls
+                                            playsInline
+                                        />
+                                    </div>
+                                    <div className="p-6 bg-white/[0.02]">
+                                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest italic">{h.caption}</p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="pwa-card p-16 flex flex-col items-center justify-center text-center bg-white/[0.01] border-dashed">
+                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                                <Activity className="text-white/10" size={32} />
+                            </div>
+                            <h4 className="text-xs font-black uppercase tracking-widest text-white/20 italic">Sin jugadas registradas</h4>
+                            <p className="text-[10px] text-white/10 mt-2 uppercase">¡Subí el primer highlight para este jugador!</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* TIME SERIES CHART */}
