@@ -9,8 +9,9 @@ export interface PlayerStats {
     points: number;
 }
 
-export function getLeaderboard(): PlayerStats[] {
+export function getLeaderboard(year?: number): PlayerStats[] {
     const stats: Record<string, PlayerStats> = {};
+    const matches = year ? HISTORICAL_MATCHES.filter(m => m.year === year) : HISTORICAL_MATCHES;
 
     PLAYERS.forEach(player => {
         stats[player] = {
@@ -23,7 +24,7 @@ export function getLeaderboard(): PlayerStats[] {
         };
     });
 
-    HISTORICAL_MATCHES.forEach(match => {
+    matches.forEach(match => {
         Object.entries(match.results).forEach(([player, result]) => {
             if (stats[player]) {
                 if (result === 1) {
@@ -42,10 +43,11 @@ export function getLeaderboard(): PlayerStats[] {
             ...s,
             winRate: s.totalGames > 0 ? (s.wins / s.totalGames) * 100 : 0
         }))
+        .filter(s => s.totalGames > 0)
         .sort((a, b) => b.points - a.points || b.winRate - a.winRate);
 }
 
-export function getHeadToHead(p1: string, p2: string) {
+export function getHeadToHead(p1: string, p2: string, year?: number) {
     let matchesTogether = 0;
     let togetherWins = 0;
     let togetherLosses = 0;
@@ -54,7 +56,9 @@ export function getHeadToHead(p1: string, p2: string) {
     let p1WinsAgainst = 0;
     let p2WinsAgainst = 0;
 
-    HISTORICAL_MATCHES.forEach(match => {
+    const matches = year ? HISTORICAL_MATCHES.filter(m => m.year === year) : HISTORICAL_MATCHES;
+
+    matches.forEach(match => {
         const r1 = match.results[p1];
         const r2 = match.results[p2];
 
@@ -81,18 +85,19 @@ export function getHeadToHead(p1: string, p2: string) {
     };
 }
 
-export function getPlayerHistory(name: string) {
+export function getPlayerHistory(name: string, year?: number) {
     let wins = 0;
     let games = 0;
 
-    // Sort matches by date if they weren't
-    const history = HISTORICAL_MATCHES
+    const matches = year ? HISTORICAL_MATCHES.filter(m => m.year === year) : HISTORICAL_MATCHES;
+
+    const history = matches
         .filter(m => m.results[name] !== undefined)
         .map(m => {
             if (m.results[name] === 1) wins++;
             games++;
             return {
-                date: m.date.split('-').slice(1).join('/'), // DD/MM format
+                date: `${m.date}/${m.year.toString().slice(-2)}`,
                 winRate: Math.round((wins / games) * 100)
             };
         });
@@ -100,8 +105,10 @@ export function getPlayerHistory(name: string) {
     return history;
 }
 
-export function getMatchHistory() {
-    return HISTORICAL_MATCHES.map(match => {
+export function getMatchHistory(year?: number) {
+    const matches = year ? HISTORICAL_MATCHES.filter(m => m.year === year) : HISTORICAL_MATCHES;
+
+    return matches.map(match => {
         return {
             ...match,
             winners: Object.entries(match.results).filter(([_, res]) => res === 1).map(([n]) => n),
@@ -111,14 +118,15 @@ export function getMatchHistory() {
     }).reverse();
 }
 
-export function getMergedHistory(p1: string, p2: string) {
-    const dates = Array.from(new Set(HISTORICAL_MATCHES.map(m => m.date))).sort();
+export function getMergedHistory(p1: string, p2: string, year?: number) {
+    const matches = year ? HISTORICAL_MATCHES.filter(m => m.year === year) : HISTORICAL_MATCHES;
+    const dates = Array.from(new Set(matches.map(m => m.date))).sort();
 
     let w1 = 0, g1 = 0;
     let w2 = 0, g2 = 0;
 
     const combined = dates.map(date => {
-        const match = HISTORICAL_MATCHES.find(m => m.date === date);
+        const match = matches.find(m => m.date === date);
         if (!match) return null;
 
         if (match.results[p1] !== undefined) {
@@ -131,7 +139,7 @@ export function getMergedHistory(p1: string, p2: string) {
         }
 
         return {
-            date: date.split('-').slice(1).join('/'),
+            date: `${date}/${match.year.toString().slice(-2)}`,
             [p1]: g1 > 0 ? Math.round((w1 / g1) * 100) : 0,
             [p2]: g2 > 0 ? Math.round((w2 / g2) * 100) : 0
         };

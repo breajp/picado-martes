@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo } from 'react';
+import { use, useMemo, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
@@ -11,12 +11,12 @@ import PerformanceChart from '@/components/PerformanceChart';
 
 export default function PlayerProfile({ params }: { params: Promise<{ name: string }> }) {
     const { name } = use(params);
-    const leaderboard = getLeaderboard();
+    const [year, setYear] = useState<number>(2025);
+
+    const leaderboard = getLeaderboard(year);
     const playerStats = leaderboard.find(p => p.name === name);
     const metadata = getPlayerMetadata(name);
-    const history = useMemo(() => getPlayerHistory(name), [name]);
-
-    if (!playerStats) return <div className="p-20 text-white">Jugador no encontrado</div>;
+    const history = useMemo(() => getPlayerHistory(name, year), [name, year]);
 
     return (
         <main className="min-h-screen relative pb-40">
@@ -53,7 +53,7 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                             <div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <span className="pwa-pill text-accent-orange border-accent-orange/30">RANGO ÉLITE</span>
-                                    <span className="text-white/40 text-[9px] font-black uppercase tracking-widest italic">Activo 2025</span>
+                                    <span className="text-white/40 text-[9px] font-black uppercase tracking-widest italic">Activo {year}</span>
                                 </div>
                                 <h1 className="pwa-title text-8xl sm:text-[12vw]">{name}</h1>
                                 <p className="text-sm font-black text-white/30 uppercase tracking-[0.4em] mt-4 italic">
@@ -75,34 +75,49 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
             {/* PERFORMANCE ANALYTICS SECTION */}
             <section className="px-6 sm:px-12 max-w-7xl mx-auto mt-12 space-y-8">
 
+                {/* YEAR SELECTOR */}
+                <div className="flex justify-center mb-12">
+                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 flex gap-1">
+                        {[2024, 2025, 2026].map(y => (
+                            <button
+                                key={y}
+                                onClick={() => setYear(y)}
+                                className={`px-8 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all ${year === y ? 'bg-accent-orange text-black' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                {y}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* KPI DASHBOARD */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
                         <Target size={20} className="text-accent-orange" />
                         <div>
-                            <p className="pwa-subtitle">Rango Global</p>
-                            <h4 className="text-4xl font-black italic">#{leaderboard.findIndex(p => p.name === name) + 1}</h4>
+                            <p className="pwa-subtitle">Rango Global {year}</p>
+                            <h4 className="text-4xl font-black italic">#{leaderboard.findIndex(p => p.name === name) !== -1 ? leaderboard.findIndex(p => p.name === name) + 1 : '--'}</h4>
                         </div>
                     </div>
                     <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
                         <Zap size={20} className="text-accent-lemon" />
                         <div>
                             <p className="pwa-subtitle">Eficacia</p>
-                            <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats.winRate.toFixed(0)}%</h4>
+                            <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats ? playerStats.winRate.toFixed(0) : '0'}%</h4>
                         </div>
                     </div>
                     <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
                         <Activity size={20} className="text-accent-blue" />
                         <div>
                             <p className="pwa-subtitle">Puntos</p>
-                            <h4 className="text-4xl font-black italic">{playerStats.points}</h4>
+                            <h4 className="text-4xl font-black italic">{playerStats ? playerStats.points : '0'}</h4>
                         </div>
                     </div>
                     <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
                         <Shield size={20} className="text-white/20" />
                         <div>
                             <p className="pwa-subtitle">Partidos</p>
-                            <h4 className="text-4xl font-black italic">{playerStats.totalGames}</h4>
+                            <h4 className="text-4xl font-black italic">{playerStats ? playerStats.totalGames : '0'}</h4>
                         </div>
                     </div>
                 </div>
@@ -111,22 +126,28 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                 <div className="pwa-card p-10 bg-white/[0.01]">
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h3 className="text-xl font-black italic uppercase tracking-tighter">Evolución de Rendimiento</h3>
-                            <p className="pwa-subtitle">Seguimiento de % de victorias - Temporada 2025</p>
+                            <h3 className="text-xl font-black italic uppercase tracking-tighter">Evolución {year}</h3>
+                            <p className="pwa-subtitle">Seguimiento de % de victorias</p>
                         </div>
-                        <div className="pwa-pill text-accent-orange">Eficacia x Línea de Tiempo</div>
+                        <div className="pwa-pill text-accent-orange">Eficacia x {year}</div>
                     </div>
 
-                    <PerformanceChart data={history} />
+                    {history.length > 0 ? (
+                        <PerformanceChart data={history} />
+                    ) : (
+                        <div className="h-[300px] flex items-center justify-center text-white/10 font-black uppercase tracking-[0.2em] italic">
+                            Sin actividad en {year}
+                        </div>
+                    )}
                 </div>
 
                 {/* ACTION / SHARE */}
                 <div className="flex flex-col sm:flex-row gap-4 pt-12">
                     <button className="flex-1 pwa-btn">
-                        <Share2 size={16} /> Exportar Reporte de Rendimiento
+                        <Share2 size={16} /> Exportar Reporte {year}
                     </button>
                     <Link href="/vs" className="flex-1">
-                        <button className="w-full h-full py-5 rounded-full border border-white/10 text-xs font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all">
+                        <button className="w-full h-full py-5 rounded-full border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 transition-all">
                             Modo Comparación de Duelos
                         </button>
                     </Link>

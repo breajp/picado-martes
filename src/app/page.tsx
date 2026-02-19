@@ -1,12 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Leaderboard from '@/components/Leaderboard';
-import { ArrowUpRight, Zap, Trophy, Flame } from 'lucide-react';
+import { ArrowUpRight, Zap, Trophy, Flame, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { getLeaderboard } from '@/lib/stats';
 
 export default function Home() {
+  const [year, setYear] = useState<number>(2025);
+  const stats = getLeaderboard(year);
+  const topPlayer = stats[0];
+
   return (
     <main className="min-h-screen relative p-6 sm:p-12 pb-40">
       {/* Background Orbs */}
@@ -18,15 +24,30 @@ export default function Home() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto">
+        {/* YEAR SELECTOR */}
+        <div className="flex justify-end mb-8 relative z-50">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 flex gap-1">
+            {[2024, 2025, 2026].map(y => (
+              <button
+                key={y}
+                onClick={() => setYear(y)}
+                className={`px-6 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all ${year === y ? 'bg-accent-orange text-black' : 'text-white/40 hover:text-white/70'}`}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* PWA HEADER */}
-        <section className="pt-20 mb-20">
+        <section className="pt-10 mb-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-6"
           >
             <div className="pwa-pill w-fit border-accent-orange/20 text-accent-orange">
-              FULBITO 4 EVER // COLECTIVO 2025
+              FULBITO 4 EVER // TEMPORADA {year}
             </div>
             <h1 className="pwa-title">
               RENDIMIENTO<br />
@@ -50,6 +71,9 @@ export default function Home() {
 
           {/* Primary MVP Module (Orange inspired) */}
           <motion.div
+            key={year + (topPlayer?.name || '')}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 0.98 }}
             className="md:col-span-2 pwa-card p-12 relative flex flex-col justify-between min-h-[400px]"
           >
@@ -59,8 +83,8 @@ export default function Home() {
               <span className="pwa-pill">Rango 01</span>
             </div>
             <div>
-              <p className="pwa-subtitle mb-3">Líder de la Temporada</p>
-              <h2 className="text-7xl font-black italic tracking-tighter">DIEGO B.</h2>
+              <p className="pwa-subtitle mb-3">Líder {year}</p>
+              <h2 className="text-7xl font-black italic tracking-tighter uppercase">{topPlayer?.name || '---'}</h2>
             </div>
           </motion.div>
 
@@ -71,8 +95,8 @@ export default function Home() {
               <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-bold">5x</div>
             </div>
             <div>
-              <p className="pwa-subtitle mb-2">Mejor Racha</p>
-              <h3 className="text-5xl font-black italic leading-none">ESTADO<br />FUEGO</h3>
+              <p className="pwa-subtitle mb-2">Máxima Eficacia</p>
+              <h3 className="text-5xl font-black italic leading-none">{topPlayer?.winRate.toFixed(0) || '0'}%<br />RATIO</h3>
             </div>
           </div>
 
@@ -80,7 +104,7 @@ export default function Home() {
           <div className="pwa-card p-10 flex flex-col justify-between min-h-[400px] bg-white/[0.01]">
             <Zap className="text-accent-lemon" size={32} />
             <div className="mt-8">
-              <p className="pwa-subtitle mb-2">Próxima Batalla</p>
+              <p className="pwa-subtitle mb-2">Frecuencia Semanal</p>
               <p className="text-3xl font-black mb-1 tracking-tight">MARTES</p>
               <p className="text-accent-lemon text-sm font-black tracking-widest leading-none">21:00 HS</p>
             </div>
@@ -92,11 +116,11 @@ export default function Home() {
         <section>
           <div className="pwa-card overflow-hidden">
             <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-              <h2 className="text-xl font-black italic uppercase tracking-tighter">Métricas Globales</h2>
+              <h2 className="text-xl font-black italic uppercase tracking-tighter">Tabla {year}</h2>
               <Link href="/history" className="pwa-pill hover:text-white transition-colors">Ver Historial →</Link>
             </div>
             <div className="overflow-x-auto">
-              <Leaderboard />
+              <Leaderboard year={year} />
             </div>
           </div>
         </section>

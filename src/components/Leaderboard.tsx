@@ -4,8 +4,12 @@ import { getLeaderboard } from "@/lib/stats";
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export default function Leaderboard() {
-    const stats = getLeaderboard();
+interface LeaderboardProps {
+    year?: number;
+}
+
+export default function Leaderboard({ year }: LeaderboardProps) {
+    const stats = getLeaderboard(year);
 
     return (
         <div className="w-full">
@@ -17,7 +21,7 @@ export default function Leaderboard() {
             </div>
 
             <div className="divide-y divide-white/[0.03]">
-                {stats.map((player, index) => (
+                {stats.length > 0 ? stats.map((player, index) => (
                     <Link key={player.name} href={`/players/${player.name}`}>
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -58,7 +62,11 @@ export default function Leaderboard() {
                             </div>
                         </motion.div>
                     </Link>
-                ))}
+                )) : (
+                    <div className="p-20 text-center text-white/20 text-xs font-black uppercase tracking-widest">
+                        Sin registros para este periodo
+                    </div>
+                )}
             </div>
         </div>
     );

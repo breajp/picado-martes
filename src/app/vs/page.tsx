@@ -9,11 +9,12 @@ import { motion } from 'framer-motion';
 import MultiPerformanceChart from '@/components/MultiPerformanceChart';
 
 export default function VSPage() {
+    const [year, setYear] = useState<number>(2025);
     const [p1, setP1] = useState(PLAYERS[0]);
     const [p2, setP2] = useState(PLAYERS[1]);
 
-    const h2h = useMemo(() => getHeadToHead(p1, p2), [p1, p2]);
-    const combinedHistory = useMemo(() => getMergedHistory(p1, p2), [p1, p2]);
+    const h2h = useMemo(() => getHeadToHead(p1, p2, year), [p1, p2, year]);
+    const combinedHistory = useMemo(() => getMergedHistory(p1, p2, year), [p1, p2, year]);
 
     const totalAgainst = h2h.matchesAgainst;
     const p1DomRate = totalAgainst > 0 ? (h2h.p1WinsAgainst / totalAgainst) * 100 : 50;
@@ -29,13 +30,27 @@ export default function VSPage() {
             </div>
 
             <section className="pt-32 max-w-7xl mx-auto">
-                <header className="mb-20">
-                    <p className="pwa-subtitle mb-4">Análisis de Duelos</p>
-                    <h1 className="pwa-title mb-6">MODO<br /><span className="text-white/20">COMPARACIÓN</span></h1>
+                <header className="mb-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+                    <div>
+                        <p className="pwa-subtitle mb-4">Análisis de Duelos</p>
+                        <h1 className="pwa-title mb-0">MODO<br /><span className="text-white/20">COMPARACIÓN</span></h1>
+                    </div>
+
+                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 flex gap-1">
+                        {[2024, 2025, 2026].map(y => (
+                            <button
+                                key={y}
+                                onClick={() => setYear(y)}
+                                className={`px-8 py-3 rounded-xl text-[10px] font-black tracking-widest transition-all ${year === y ? 'bg-accent-orange text-black' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                {y}
+                            </button>
+                        ))}
+                    </div>
                 </header>
 
                 {/* SELECTORS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 md:mt-20">
                     {[{ val: p1, set: setP1, label: "Jugador A" }, { val: p2, set: setP2, label: "Jugador B" }].map((sel, idx) => (
                         <div key={idx} className="pwa-card p-10 bg-white/[0.02]">
                             <p className="pwa-subtitle mb-4">{sel.label}</p>
@@ -55,7 +70,7 @@ export default function VSPage() {
                     <div className="pwa-card p-10 bg-white/[0.02] border-white/5">
                         <div className="flex items-center gap-4 mb-10 text-white/40">
                             <Users size={24} />
-                            <h3 className="text-sm font-black italic uppercase tracking-widest">Cuando Juegan Juntos</h3>
+                            <h3 className="text-sm font-black italic uppercase tracking-widest">En Squad ({year})</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-8">
                             <div>
@@ -76,7 +91,7 @@ export default function VSPage() {
                     <div className="pwa-card p-10 bg-accent-orange text-black">
                         <div className="flex items-center gap-4 mb-10 opacity-60">
                             <Swords size={24} />
-                            <h3 className="text-sm font-black italic uppercase tracking-widest text-black">Uno Contra el Otro</h3>
+                            <h3 className="text-sm font-black italic uppercase tracking-widest text-black">Cara a Cara ({year})</h3>
                         </div>
                         <div className="flex items-center justify-between gap-4">
                             <div className="text-center flex-1">
@@ -91,7 +106,12 @@ export default function VSPage() {
                         </div>
                         <div className="mt-8 pt-6 border-t border-black/10">
                             <div className="w-full h-2 bg-black/10 rounded-full overflow-hidden flex">
-                                <motion.div initial={{ width: 0 }} animate={{ width: `${p1DomRate}%` }} className="h-full bg-black" />
+                                <motion.div
+                                    key={p1DomRate}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${p1DomRate}%` }}
+                                    className="h-full bg-black"
+                                />
                             </div>
                         </div>
                     </div>
@@ -102,7 +122,7 @@ export default function VSPage() {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                         <div className="flex items-center gap-4">
                             <TrendingUp className="text-accent-lemon" />
-                            <h3 className="text-xl font-black italic uppercase tracking-tighter">Trayectoria Comparada</h3>
+                            <h3 className="text-xl font-black italic uppercase tracking-tighter">Trayectoria {year}</h3>
                         </div>
                         <div className="flex gap-6">
                             <div className="flex items-center gap-2">
