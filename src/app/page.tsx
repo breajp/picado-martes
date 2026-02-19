@@ -1,94 +1,106 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Leaderboard from '@/components/Leaderboard';
-import { Target, Trophy, Flame } from 'lucide-react';
+import { ArrowRight, Trophy, Zap, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+
   return (
-    <main className="min-h-screen relative">
-      <div className="bg-stadium" />
-      <div className="bg-mesh" />
+    <main ref={containerRef} className="relative min-h-[200vh]">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 pt-40 pb-20 sm:px-6">
-        {/* Hero Section */}
-        <section className="flex flex-col items-center text-center mb-32">
+      {/* SECTION 1: HERO EDITORIAL */}
+      <section className="h-screen flex flex-col justify-end p-6 sm:p-20 relative overflow-hidden">
+        <div className="luxury-grid opacity-30" />
+
+        <motion.div style={{ y: textY }} className="relative z-10 max-w-7xl mx-auto w-full">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="px-4 py-1.5 mb-8 glass-card rounded-full text-[10px] font-black tracking-[0.3em] text-primary uppercase inline-flex items-center gap-2"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-4 mb-8"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            Season 2025 Live
+            <span className="w-12 h-px bg-accent" />
+            <span className="text-accent text-sm font-black uppercase tracking-[0.5em]">Season Two • 2025</span>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="title-hero"
-          >
-            Martes de<br />Fútbol
-          </motion.h1>
+          <h1 className="text-[12vw] sm:text-[15vw] display-bold leading-none text-gradient mb-12">
+            PROPIEDAD<br />DE LOS<br />MARTES
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="mt-8 max-w-2xl text-gray-400 text-lg sm:text-xl font-light leading-relaxed"
-          >
-            Donde se forjan las leyendas y se pagan las birras. El seguimiento definitivo del picado más picante de la semana.
-          </motion.p>
-        </section>
+          <div className="flex flex-col sm:flex-row justify-between items-end gap-12">
+            <p className="max-w-md text-gray-400 text-lg font-light leading-relaxed">
+              La plataforma definitiva para el seguimiento de rendimiento, rivalidades y estadísticas del fútbol amateur más competitivo.
+            </p>
 
-        {/* Highlight Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
-          {[
-            { label: 'El que más sabe', val: 'DIEGO', sub: '92% Efectividad', icon: Trophy, color: 'text-accent' },
-            { label: 'Próximo Combate', val: '21:00 HS', sub: 'Sede GRUN', icon: Target, color: 'text-primary' },
-            { label: 'En Racha', val: 'KUKA', sub: '4 Ganados al hilo', icon: Flame, color: 'text-rose-500' },
-          ].map((item, i) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + i * 0.1 }}
-              className="glass-card p-8 group overflow-hidden relative"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-500">
-                <item.icon size={80} />
+            <Link href="/players">
+              <button className="magnetic-btn">
+                Explorar Plantel <ArrowRight size={18} />
+              </button>
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* SECTION 2: STATS OVERVIEW */}
+      <section className="min-h-screen px-6 py-40 sm:px-20 bg-white/5 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+            <div className="lg:col-span-4">
+              <h2 className="text-6xl display-bold mb-8">EL<br /><span className="text-accent italic">ESTADO</span><br />DE LA<br />CANCHA</h2>
+              <p className="text-gray-500 font-medium mb-12">Datos en tiempo real sincronizados con cada victoria.</p>
+
+              <div className="space-y-6">
+                <div className="super-glass p-8 flex items-center justify-between group">
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-gray-500 mb-1">Última Sede</p>
+                    <p className="text-2xl font-black">GRUN STADIUM</p>
+                  </div>
+                  <MapPin className="text-accent opacity-20 group-hover:opacity-100 transition-opacity" size={32} />
+                </div>
+                <div className="super-glass p-8 flex items-center justify-between group border-accent/20">
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-gray-500 mb-1">MVP de la Semana</p>
+                    <p className="text-2xl font-black text-accent">DIEGO BREA</p>
+                  </div>
+                  <Trophy className="text-accent" size={32} />
+                </div>
               </div>
-              <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-4">{item.label}</p>
-              <p className="text-3xl font-black mb-1">{item.val}</p>
-              <p className={`${item.color} font-bold text-sm tracking-tight`}>{item.sub}</p>
-            </motion.div>
-          ))}
-        </div>
+            </div>
 
-        {/* Main Content */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="glass-card p-1 sm:p-4 overflow-hidden"
-        >
-          <div className="px-6 py-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-black tracking-tight mb-1 uppercase">Tabla General</h2>
-              <p className="text-gray-500 font-medium text-sm">Actualizado al último martes: <span className="text-white">02/12/2025</span></p>
+            <div className="lg:col-span-8">
+              <div className="flex justify-between items-end mb-12">
+                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-accent">Global Leaderboard</h3>
+                <Link href="/vs" className="text-xs font-bold text-gray-500 hover:text-white transition-colors">Ver Comparativo →</Link>
+              </div>
+              <div className="super-glass overflow-hidden">
+                <Leaderboard />
+              </div>
             </div>
           </div>
-          <Leaderboard />
-        </motion.section>
-      </div>
+        </div>
+      </section>
 
-      <footer className="py-20 text-center text-gray-600 text-[10px] font-black uppercase tracking-[0.5em]">
-        designed for the elite • 2026 FTBL.APP
+      <footer className="h-screen flex flex-col items-center justify-center text-center p-20">
+        <h2 className="text-[10vw] display-bold text-white/5 absolute pointer-events-none">FOOTBALL CLUB</h2>
+        <div className="relative z-10">
+          <p className="text-gray-600 font-black uppercase tracking-[1em] text-[10px] mb-8">Designed for the boys</p>
+          <div className="flex gap-4">
+            <div className="w-12 h-px bg-white/10" />
+            <Zap className="text-accent" />
+            <div className="w-12 h-px bg-white/10" />
+          </div>
+        </div>
       </footer>
     </main>
   );

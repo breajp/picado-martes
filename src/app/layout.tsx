@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Cursor from "@/components/Cursor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Picado de los Martes - App Oficial",
+  title: "MARTES FTBL | Official App",
   description: "Estadísticas, equipos aleatorios y seguimiento de victorias para el picado de fútbol de los martes.",
 };
 
@@ -25,6 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <div className="noise-overlay" />
+        <div className="luxury-bg" />
+        <Cursor />
         {children}
       </body>
     </html>

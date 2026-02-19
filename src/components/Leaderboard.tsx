@@ -7,66 +7,66 @@ export default function Leaderboard() {
     const stats = getLeaderboard();
 
     return (
-        <div className="w-full overflow-x-auto">
-            <table className="premium-table">
-                <thead>
-                    <tr className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                        <th className="text-center w-20">#</th>
-                        <th className="text-left min-w-[200px]">Jugador</th>
-                        <th className="text-center">Pts</th>
-                        <th className="text-center">PJ</th>
-                        <th className="text-center">G</th>
-                        <th className="text-center">P</th>
-                        <th className="text-right pr-8">Performance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {stats.map((player, index) => (
-                        <motion.tr
-                            key={player.name}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.05 }}
-                            className="group"
-                        >
-                            <td className="text-center font-black text-gray-600 group-hover:text-primary transition-colors">
-                                {(index + 1).toString().padStart(2, '0')}
-                            </td>
-                            <td className="text-left font-black text-lg">
-                                <span className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                                        {player.name[0]}
-                                    </div>
-                                    {player.name}
-                                </span>
-                            </td>
-                            <td className="text-center">
-                                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-black border border-primary/20">
-                                    {player.points}
+        <div className="w-full">
+            <div className="hidden sm:grid grid-cols-12 px-8 py-6 text-gray-600 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+                <div className="col-span-1">#</div>
+                <div className="col-span-5">Protagonista</div>
+                <div className="col-span-2 text-center">Pts</div>
+                <div className="col-span-2 text-center">G/P</div>
+                <div className="col-span-2 text-right">Ratio</div>
+            </div>
+
+            <div className="divide-y divide-white/5">
+                {stats.map((player, index) => (
+                    <motion.div
+                        key={player.name}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.05 }}
+                        className="grid grid-cols-12 px-8 py-8 items-center group cursor-pointer hover:bg-white/[0.02] transition-colors"
+                    >
+                        <div className="col-span-1 font-display text-2xl text-white/10 group-hover:text-accent transition-colors">
+                            {(index + 1).toString().padStart(2, '0')}
+                        </div>
+
+                        <div className="col-span-11 sm:col-span-5 flex items-center gap-6">
+                            <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center font-black group-hover:border-accent group-hover:bg-accent group-hover:text-black transition-all">
+                                {player.name[0]}
+                            </div>
+                            <div>
+                                <h4 className="text-xl font-bold tracking-tight uppercase group-hover:text-accent transition-colors">{player.name}</h4>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{player.totalGames} Partidos</p>
+                            </div>
+                        </div>
+
+                        <div className="hidden sm:block col-span-2 text-center">
+                            <span className="text-2xl font-display text-white italic">{player.points}</span>
+                        </div>
+
+                        <div className="hidden sm:block col-span-2 text-center">
+                            <div className="flex justify-center items-center gap-3">
+                                <span className="text-emerald-400 font-bold">{player.wins}</span>
+                                <span className="text-gray-700">|</span>
+                                <span className="text-rose-500 font-bold">{player.losses}</span>
+                            </div>
+                        </div>
+
+                        <div className="col-span-12 sm:col-span-2 text-right mt-4 sm:mt-0">
+                            <div className="flex flex-col items-end gap-2">
+                                <span className="text-sm font-black group-hover:text-accent transition-colors">{player.winRate.toFixed(0)}%</span>
+                                <div className="w-20 h-[2px] bg-white/5 relative">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${player.winRate}%` }}
+                                        className="absolute inset-0 bg-accent shadow-[0_0_10px_var(--accent)]"
+                                    />
                                 </div>
-                            </td>
-                            <td className="text-center font-bold text-gray-400">{player.totalGames}</td>
-                            <td className="text-center font-bold text-emerald-500">{player.wins}</td>
-                            <td className="text-center font-bold text-rose-500">{player.losses}</td>
-                            <td className="text-right pr-8">
-                                <div className="flex items-center justify-end gap-3">
-                                    <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            whileInView={{ width: `${player.winRate}%` }}
-                                            viewport={{ once: true }}
-                                            transition={{ duration: 1, ease: 'easeOut' }}
-                                            className="h-full bg-gradient-to-r from-primary to-secondary"
-                                        />
-                                    </div>
-                                    <span className="text-xs font-black text-gray-400 w-10">{player.winRate.toFixed(0)}%</span>
-                                </div>
-                            </td>
-                        </motion.tr>
-                    ))}
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
         </div>
     );
 }
