@@ -17,7 +17,7 @@ export default function Home() {
   const totalGoals = stats.reduce((acc, curr) => acc + (curr.totalGames * 3), 0); // Estimado goles totales
 
   return (
-    <main className="min-h-screen relative p-6 sm:p-12 pb-40">
+    <main className="min-h-screen relative p-6 sm:p-12 pb-80">
       {/* Background Orbs */}
       <div className="pwa-mesh">
         <div className="mesh-orb-1 opacity-20" />
