@@ -126,7 +126,7 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                         <Share2 size={16} /> Exportar Reporte de Rendimiento
                     </button>
                     <Link href="/vs" className="flex-1">
-                        <button className="w-full btn-modern-dark h-full py-5 rounded-full border border-white/10 text-xs font-black uppercase tracking-widest">
+                        <button className="w-full h-full py-5 rounded-full border border-white/10 text-xs font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all">
                             Modo Comparación de Duelos
                         </button>
                     </Link>

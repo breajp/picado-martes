@@ -46,9 +46,10 @@ export function getLeaderboard(): PlayerStats[] {
 }
 
 export function getHeadToHead(p1: string, p2: string) {
-    let p1Wins = 0;
-    let p2Wins = 0;
     let matchesTogether = 0;
+    let togetherWins = 0;
+    let togetherLosses = 0;
+
     let matchesAgainst = 0;
     let p1WinsAgainst = 0;
     let p2WinsAgainst = 0;
@@ -57,22 +58,23 @@ export function getHeadToHead(p1: string, p2: string) {
         const r1 = match.results[p1];
         const r2 = match.results[p2];
 
-        if (r1 !== undefined && r2 !== undefined && r1 !== null && r2 !== null) {
+        if (r1 !== undefined && r2 !== undefined) {
             if (r1 === r2) {
                 matchesTogether++;
-                if (r1 === 1) {
-                    // Both won
-                }
+                if (r1 === 1) togetherWins++;
+                else if (r1 === -1) togetherLosses++;
             } else {
                 matchesAgainst++;
                 if (r1 === 1) p1WinsAgainst++;
-                else p2WinsAgainst++;
+                else if (r2 === 1) p2WinsAgainst++;
             }
         }
     });
 
     return {
         matchesTogether,
+        togetherWins,
+        togetherLosses,
         matchesAgainst,
         p1WinsAgainst,
         p2WinsAgainst
