@@ -22,11 +22,11 @@ export default function PlayersPage() {
                 <header className="mb-24">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        animate={{ opacity: 1, y: 0 }}
                     >
-                        <p className="pwa-subtitle mb-4">Tactical Database</p>
+                        <p className="pwa-subtitle mb-4">Base de Datos Táctica</p>
                         <h1 className="pwa-title mb-6">
-                            OPERATIONAL<br /><span className="text-white/20">ROSTER</span>
+                            PLANTEL<br /><span className="text-white/20">OPERATIVO</span>
                         </h1>
                     </motion.div>
                 </header>

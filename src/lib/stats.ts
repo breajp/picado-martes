@@ -97,3 +97,43 @@ export function getPlayerHistory(name: string) {
 
     return history;
 }
+
+export function getMatchHistory() {
+    return HISTORICAL_MATCHES.map(match => {
+        return {
+            ...match,
+            winners: Object.entries(match.results).filter(([_, res]) => res === 1).map(([n]) => n),
+            losers: Object.entries(match.results).filter(([_, res]) => res === -1).map(([n]) => n),
+            location: match.location || "Grun Club"
+        };
+    }).reverse();
+}
+
+export function getMergedHistory(p1: string, p2: string) {
+    const dates = Array.from(new Set(HISTORICAL_MATCHES.map(m => m.date))).sort();
+
+    let w1 = 0, g1 = 0;
+    let w2 = 0, g2 = 0;
+
+    const combined = dates.map(date => {
+        const match = HISTORICAL_MATCHES.find(m => m.date === date);
+        if (!match) return null;
+
+        if (match.results[p1] !== undefined) {
+            if (match.results[p1] === 1) w1++;
+            g1++;
+        }
+        if (match.results[p2] !== undefined) {
+            if (match.results[p2] === 1) w2++;
+            g2++;
+        }
+
+        return {
+            date: date.split('-').slice(1).join('/'),
+            [p1]: g1 > 0 ? Math.round((w1 / g1) * 100) : 0,
+            [p2]: g2 > 0 ? Math.round((w2 / g2) * 100) : 0
+        };
+    }).filter(d => d !== null);
+
+    return combined;
+}

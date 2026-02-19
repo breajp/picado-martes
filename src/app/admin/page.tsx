@@ -41,8 +41,8 @@ export default function AdminPage() {
 
             <section className="pt-32 max-w-7xl mx-auto">
                 <header className="mb-16">
-                    <p className="pwa-subtitle mb-4">Master Console</p>
-                    <h1 className="pwa-title mb-6">DATA RECEPTION</h1>
+                    <p className="pwa-subtitle mb-4">Consola Maestra</p>
+                    <h1 className="pwa-title mb-6">RECEPCIÓN DE<br /><span className="text-white/20">DATOS</span></h1>
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -51,12 +51,12 @@ export default function AdminPage() {
                         <div className="pwa-card p-10 bg-white/[0.02]">
                             <div className="flex items-center gap-4 mb-10">
                                 <Database className="text-accent-orange" />
-                                <h2 className="text-2xl font-black italic">NEW MATCH RECORD</h2>
+                                <h2 className="text-2xl font-black italic uppercase">Nuevo Registro de Partido</h2>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                 <div className="space-y-6">
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Match Date</label>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Fecha del Encuentro</label>
                                     <input
                                         type="date"
                                         value={date}
@@ -67,7 +67,7 @@ export default function AdminPage() {
 
                                 <div className="flex gap-6">
                                     <div className="flex-1 space-y-6">
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Team White</label>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Goles Blancos</label>
                                         <input
                                             type="number"
                                             value={score1}
@@ -76,7 +76,7 @@ export default function AdminPage() {
                                         />
                                     </div>
                                     <div className="flex-1 space-y-6">
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Team Black</label>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-white/30">Goles Negros</label>
                                         <input
                                             type="number"
                                             value={score2}
@@ -90,7 +90,7 @@ export default function AdminPage() {
 
                         {/* Roster Assignment */}
                         <div className="pwa-card p-10">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-white/30 mb-8">Squad Assignment</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-white/30 mb-8">Asignación de Plantel</h3>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 {PLAYERS.map(player => (
                                     <button
@@ -103,7 +103,7 @@ export default function AdminPage() {
                                     >
                                         <span className="text-xs font-black uppercase italic">{player}</span>
                                         <span className="text-[8px] font-bold uppercase tracking-widest opacity-60">
-                                            {team1.includes(player) ? 'T1' : team2.includes(player) ? 'T2' : 'Bench'}
+                                            {team1.includes(player) ? 'BLANCO' : team2.includes(player) ? 'NEGRO' : 'BANCO'}
                                         </span>
                                     </button>
                                 ))}
@@ -114,19 +114,19 @@ export default function AdminPage() {
                     {/* Action Hub */}
                     <div className="space-y-8">
                         <div className="pwa-card p-10 bg-accent-orange text-black">
-                            <p className="font-black uppercase tracking-[0.2em] text-[10px] mb-8">Status Check</p>
+                            <p className="font-black uppercase tracking-[0.2em] text-[10px] mb-8">Estado de Carga</p>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm font-bold">
-                                    <span>Total Assigned</span>
+                                    <span>Total Asignados</span>
                                     <span className="text-2xl font-black">{team1.length + team2.length}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm font-bold opacity-60">
-                                    <span>Sync Ready</span>
-                                    <span>YES</span>
+                                    <span>Sync Listo</span>
+                                    <span>SÍ</span>
                                 </div>
                             </div>
                             <button className="w-full mt-10 bg-black text-white py-5 rounded-3xl font-black italic flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform">
-                                <Save size={20} /> SYNC DATABASE
+                                <Save size={20} /> SINCRONIZAR BASE
                             </button>
                         </div>
 
@@ -134,7 +134,7 @@ export default function AdminPage() {
                             <div className="flex gap-4 text-white/40">
                                 <AlertCircle size={20} />
                                 <p className="text-xs font-medium leading-relaxed">
-                                    Este registro afectará directamente los coeficientes de eficacia y las rachas históricas de los jugadores.
+                                    Esta operación afectará los coeficientes históricos y gráficos de rendimiento de todo el plantel.
                                 </p>
                             </div>
                         </div>

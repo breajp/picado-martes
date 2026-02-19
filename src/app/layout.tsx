@@ -8,8 +8,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "FTBL.APP | Premium Match Tracker",
-  description: "Advanced performance diagnostics and match tracking for elite amateurs.",
+  title: "FULBITO 4 EVER | Estadísticas de Fútbol",
+  description: "Seguimiento de rendimiento y estadísticas para el picado de los martes.",
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={`${outfit.variable} font-sans`}>
         <div className="scene-bg">
           <div className="glow-blob blob-pink" />
