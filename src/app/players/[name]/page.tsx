@@ -2,7 +2,7 @@
 
 import { use, useMemo, useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
-import { getLeaderboard, getPlayerHistory, getPlayerSynergy } from '@/lib/stats';
+import { getLeaderboard, getPlayerHistory, getPlayerSynergy, getHeadToHead } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils, Plus, Heart, Users, Skull } from 'lucide-react';
@@ -21,6 +21,7 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
     const [videoUploading, setVideoUploading] = useState(false);
     const [showUploadForm, setShowUploadForm] = useState(false);
     const videoInputRef = useRef<HTMLInputElement>(null);
+    const [compareWith, setCompareWith] = useState<string>("");
 
     // Form settings for new video
     const [selectedCategory, setSelectedCategory] = useState('Magia');
@@ -32,6 +33,7 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
     const metadata = getPlayerMetadata(name);
     const history = useMemo(() => getPlayerHistory(name, year), [name, year]);
     const synergy = useMemo(() => getPlayerSynergy(name, year), [name, year]);
+    const h2h = useMemo(() => compareWith ? getHeadToHead(name, compareWith, year) : null, [name, compareWith, year]);
 
     useEffect(() => {
         async function fetchData() {
@@ -256,6 +258,65 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                             <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats ? playerStats.morfiRate.toFixed(0) : '0'}%</h4>
                         </div>
                     </div>
+                </div>
+
+                {/* VERSUS / H2H TOOL */}
+                <div className="pwa-card p-10 bg-white/[0.01] border-white/5 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-accent-lemon/5 blur-[80px] -z-10" />
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+                        <div>
+                            <h3 className="text-2xl font-black italic uppercase tracking-tighter">Cara a Cara</h3>
+                            <p className="pwa-subtitle">Compará tu rendimiento contra otros</p>
+                        </div>
+                        <select
+                            onChange={(e) => setCompareWith(e.target.value)}
+                            className="pwa-input !w-full md:!w-64 !bg-white/5 !border-white/10 text-xs font-black uppercase tracking-widest"
+                        >
+                            <option value="">Seleccionar Rival...</option>
+                            {PLAYERS.filter(p => p !== name).map(p => (
+                                <option key={p} value={p}>{p}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {compareWith && h2h ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            <div className="space-y-8">
+                                <div className="flex justify-between items-end">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Jugando Juntos</p>
+                                    <p className="text-xs font-black text-accent-lemon">{h2h.togetherWins}W - {h2h.togetherLosses}L</p>
+                                </div>
+                                <div className="h-4 bg-white/5 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-accent-lemon" style={{ width: `${(h2h.togetherWins / (h2h.matchesTogether || 1)) * 100}%` }} />
+                                </div>
+                                <p className="text-[9px] font-bold text-white/40 italic text-center uppercase tracking-widest">
+                                    Efectividad como dupla: {h2h.matchesTogether > 0 ? ((h2h.togetherWins / h2h.matchesTogether) * 100).toFixed(0) : 0}%
+                                </p>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div className="flex justify-between items-end">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Enfrentados</p>
+                                    <div className="flex gap-4 text-xs font-black">
+                                        <span className="text-accent-orange">{name}: {h2h.p1WinsAgainst}</span>
+                                        <span className="text-white/20">vs</span>
+                                        <span className="text-white">{compareWith}: {h2h.p2WinsAgainst}</span>
+                                    </div>
+                                </div>
+                                <div className="h-4 bg-white/5 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-accent-orange" style={{ width: `${(h2h.p1WinsAgainst / (h2h.matchesAgainst || 1)) * 100}%` }} />
+                                    <div className="h-full bg-white/20" style={{ width: `${(h2h.p2WinsAgainst / (h2h.matchesAgainst || 1)) * 100}%` }} />
+                                </div>
+                                <p className="text-[9px] font-bold text-white/40 italic text-center uppercase tracking-widest">
+                                    Dominio personal: {h2h.p1WinsAgainst > h2h.p2WinsAgainst ? name : h2h.p2WinsAgainst > h2h.p1WinsAgainst ? compareWith : 'Empate'}
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="h-32 flex items-center justify-center border-2 border-dashed border-white/5 rounded-[32px]">
+                            <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em]">Elegí un jugador para empezar el duelo</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* SYNERGY SECTION */}
