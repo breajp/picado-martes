@@ -16,6 +16,9 @@ export default function Navbar() {
                 <Link href="/vs" className="text-sm font-medium hover:text-primary transition-colors">
                     VS
                 </Link>
+                <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors">
+                    Admin
+                </Link>
                 <button className="bg-primary hover:bg-emerald-600 text-black px-4 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105">
                     Login
                 </button>
