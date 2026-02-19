@@ -207,3 +207,20 @@ export function getPlayerSynergy(name: string, year?: number) {
 
     return { bestPartners, worstRivals };
 }
+export function getGlobalStats(year: number) {
+    const leaderboard = getLeaderboard(year);
+    const matches = HISTORICAL_MATCHES.filter(m => m.year === year);
+
+    const totalMatches = matches.length;
+    const topPlayer = leaderboard[0];
+    const mostWins = leaderboard.reduce((max, p) => p.wins > max.wins ? p : max, leaderboard[0]);
+    const morfiMaster = [...leaderboard].sort((a, b) => b.morfiRate - a.morfiRate)[0];
+
+    return {
+        totalMatches,
+        topPlayer,
+        mostWins,
+        morfiMaster,
+        playerCount: PLAYERS.length
+    };
+}

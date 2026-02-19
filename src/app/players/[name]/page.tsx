@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { getLeaderboard, getPlayerHistory, getPlayerSynergy, getHeadToHead } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils, Plus, Heart, Users, Skull } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils, Plus, Heart, Users, Skull, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import PerformanceChart from '@/components/PerformanceChart';
 import { supabase } from '@/lib/supabase';
@@ -151,6 +151,35 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
             ));
         } catch (err) {
             console.error('Error liking:', err);
+        }
+    };
+
+    const handleDeleteHighlight = async (highlight: any) => {
+        if (!supabase || !confirm('¿Estás seguro de que querés borrar esta jugada?')) return;
+
+        try {
+            // 1. Delete from database (Cascade will handle highlight_players if set up, or we do it manually)
+            // Manual delete of links first to avoid foreign key issues
+            await supabase.from('highlight_players').delete().eq('highlight_id', highlight.id);
+            const { error: dbError } = await supabase.from('player_highlights').delete().eq('id', highlight.id);
+            if (dbError) throw dbError;
+
+            // 2. Delete from storage
+            const url = highlight.video_url;
+            const path = url.split('/public/player-highlights/')[1];
+            if (path) {
+                const { error: storageError } = await supabase.storage
+                    .from('player-highlights')
+                    .remove([path]);
+                if (storageError) console.error('Error deleting file:', storageError);
+            }
+
+            // 3. Update local state
+            setHighlights(prev => prev.filter(h => h.id !== highlight.id));
+            alert('Jugada eliminada con éxito');
+        } catch (err: any) {
+            console.error('Error deleting:', err);
+            alert(`Error al borrar: ${err.message}`);
         }
     };
 
@@ -435,14 +464,22 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                                             {h.match_date && <span className="pwa-pill !bg-black/60 backdrop-blur-md text-white/60 border-white/10 text-[9px]">{h.match_date.split('-').reverse().slice(0, 2).join('/')}</span>}
                                         </div>
 
-                                        {/* LIKE BUTTON OVERLAY */}
-                                        <button
-                                            onClick={() => handleLike(h.id)}
-                                            className="absolute bottom-6 right-6 z-20 p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:scale-110 active:scale-95 transition-all text-white flex flex-col items-center gap-1 min-w-[50px]"
-                                        >
-                                            <Heart size={20} className={h.likes > 0 ? "fill-red-500 text-red-500" : "text-white"} />
-                                            <span className="text-[10px] font-black">{h.likes || 0}</span>
-                                        </button>
+                                        {/* ACTION BUTTONS OVERLAY */}
+                                        <div className="absolute top-6 right-6 z-20 flex flex-col gap-3">
+                                            <button
+                                                onClick={() => handleDeleteHighlight(h)}
+                                                className="p-3 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-red-500/80 hover:border-red-500 transition-all text-white/40 hover:text-white"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleLike(h.id)}
+                                                className="p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:scale-110 active:scale-95 transition-all text-white flex flex-col items-center gap-1 min-w-[50px]"
+                                            >
+                                                <Heart size={20} className={h.likes > 0 ? "fill-red-500 text-red-500" : "text-white"} />
+                                                <span className="text-[10px] font-black">{h.likes || 0}</span>
+                                            </button>
+                                        </div>
 
                                         <video src={h.video_url} className="w-full h-full object-cover" controls playsInline />
                                     </div>
