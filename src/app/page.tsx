@@ -12,6 +12,8 @@ export default function Home() {
   const [year, setYear] = useState<number>(2025);
   const stats = getLeaderboard(year);
   const topPlayer = stats[0];
+  const totalMatches = stats.reduce((acc, curr) => acc + curr.totalGames, 0) / 10; // Estimado partidos únicos
+  const totalGoals = stats.reduce((acc, curr) => acc + (curr.totalGames * 3), 0); // Estimado goles totales
 
   return (
     <main className="min-h-screen relative p-6 sm:p-12 pb-40">
@@ -51,11 +53,14 @@ export default function Home() {
             </div>
             <h1 className="pwa-title">
               FULBITO<br />
-              <span className="text-white/20">FOR EVER</span>
+              <span className="text-white/20 relative group">
+                FOR EVER
+                <span className="absolute -bottom-2 left-0 w-0 h-1 bg-accent-orange transition-all duration-700 group-hover:w-full" />
+              </span>
             </h1>
             <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between mt-8">
-              <p className="max-w-md text-white/50 text-base leading-relaxed">
-                Sistema de análisis del picado de los martes. Seguimiento de eficacia, registros históricos y duelos directos.
+              <p className="max-w-md text-white/50 text-base leading-relaxed border-l-2 border-white/5 pl-6">
+                Ecosistema digital del picado de los martes. <span className="text-white/80">Estadísticas reales, duelos de sangre y registros históricos</span> bajo una misma bandera.
               </p>
               <Link href="/players">
                 <button className="pwa-btn">
@@ -77,10 +82,13 @@ export default function Home() {
             whileHover={{ scale: 0.98 }}
             className="md:col-span-2 pwa-card p-12 relative flex flex-col justify-between min-h-[400px]"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent-orange/10 blur-[80px] -z-10" />
+            <div className="absolute top-0 right-0 w-80 h-80 bg-accent-orange/20 blur-[100px] -z-10 group-hover:bg-accent-orange/30 transition-all duration-700" />
             <div className="flex justify-between items-start">
-              <Trophy className="text-accent-orange" size={40} strokeWidth={1.5} />
-              <span className="pwa-pill">Rango 01</span>
+              <div className="flex flex-col">
+                <Trophy className="text-accent-orange mb-4" size={48} strokeWidth={1} />
+                <span className="text-[10px] font-black tracking-[0.5em] text-accent-orange uppercase">Golden Player</span>
+              </div>
+              <span className="pwa-pill bg-accent-orange/10 border-accent-orange/20 text-accent-orange">Rango 01</span>
             </div>
             <div>
               <p className="pwa-subtitle mb-3">Líder {year}</p>
