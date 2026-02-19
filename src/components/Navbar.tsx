@@ -8,7 +8,8 @@ export default function Navbar() {
     const pathname = usePathname();
 
     const links = [
-        { href: '/', label: 'INICIO' },
+        { href: '/', label: 'HOME' },
+        { href: '/leaderboard', label: 'TABLA' },
         { href: '/players', label: 'PLANTEL' },
         { href: '/vs', label: 'DUELOS' },
         { href: '/history', label: 'HISTORIAL' },
