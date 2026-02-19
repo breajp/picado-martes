@@ -2,10 +2,10 @@
 
 import { use, useMemo, useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
-import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
+import { getLeaderboard, getPlayerHistory, getPlayerSynergy } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils, Plus } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2, Utensils, Plus, Heart, Users, Skull } from 'lucide-react';
 import Link from 'next/link';
 import PerformanceChart from '@/components/PerformanceChart';
 import { supabase } from '@/lib/supabase';
@@ -31,6 +31,7 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
     const playerStats = leaderboard.find(p => p.name === name);
     const metadata = getPlayerMetadata(name);
     const history = useMemo(() => getPlayerHistory(name, year), [name, year]);
+    const synergy = useMemo(() => getPlayerSynergy(name, year), [name, year]);
 
     useEffect(() => {
         async function fetchData() {
@@ -123,14 +124,31 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
 
             if (pError) throw pError;
 
-            setHighlights([highlight, ...highlights]);
+            setHighlights([{ ...highlight, likes: 0 }, ...highlights]);
             setShowUploadForm(false);
             alert('¡Video subido y etiquetado con éxito!');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error:', error);
-            alert('Error al subir. Revisá el bucket y las tablas.');
+            const msg = error.message || 'Error desconocido';
+            alert(`Error al subir: ${msg}. Revisá que el bucket 'player-highlights' sea público y tenga las políticas de INSERT configuradas.`);
         } finally {
             setVideoUploading(false);
+        }
+    };
+
+    const handleLike = async (highlightId: string) => {
+        if (!supabase) return;
+        try {
+            // Llamamos a la función RPC que creamos en el SQL
+            const { error } = await supabase.rpc('increment_likes', { highlight_row_id: highlightId });
+            if (error) throw error;
+
+            // Actualizamos el estado local para feedback instantáneo
+            setHighlights(prev => prev.map(h =>
+                h.id === highlightId ? { ...h, likes: (h.likes || 0) + 1 } : h
+            ));
+        } catch (err) {
+            console.error('Error liking:', err);
         }
     };
 
@@ -240,6 +258,51 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                     </div>
                 </div>
 
+                {/* SYNERGY SECTION */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="pwa-card p-10 bg-gradient-to-br from-accent-orange/10 to-transparent border-accent-orange/20">
+                        <div className="flex items-center gap-4 mb-8">
+                            <Users className="text-accent-orange" size={24} />
+                            <h3 className="text-xl font-black italic uppercase tracking-widest">Socios Ideales</h3>
+                        </div>
+                        <div className="space-y-6">
+                            {synergy.bestPartners.length > 0 ? synergy.bestPartners.map((p, i) => (
+                                <Link href={`/players/${p.name}`} key={p.name} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-black text-white/20 italic">0{i + 1}</span>
+                                        <span className="text-sm font-bold uppercase italic">{p.name}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-black text-accent-orange">{p.winRate.toFixed(0)}% WIN RATE</p>
+                                        <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">{p.games} Jugados</p>
+                                    </div>
+                                </Link>
+                            )) : <p className="text-[10px] font-black text-white/20 uppercase tracking-widest italic py-4">Faltan datos para calcular química</p>}
+                        </div>
+                    </div>
+
+                    <div className="pwa-card p-10 bg-gradient-to-br from-white/[0.02] to-transparent border-white/5">
+                        <div className="flex items-center gap-4 mb-8">
+                            <Skull className="text-white/40" size={24} />
+                            <h3 className="text-xl font-black italic uppercase tracking-widest">Criptonita</h3>
+                        </div>
+                        <div className="space-y-6">
+                            {synergy.worstRivals.length > 0 ? synergy.worstRivals.map((p, i) => (
+                                <Link href={`/players/${p.name}`} key={p.name} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-black text-white/20 italic">0{i + 1}</span>
+                                        <span className="text-sm font-bold uppercase italic">{p.name}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-black text-white/60">{p.lossRate.toFixed(0)}% DERROTAS</p>
+                                        <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">{p.games} Enfrentamientos</p>
+                                    </div>
+                                </Link>
+                            )) : <p className="text-[10px] font-black text-white/20 uppercase tracking-widest italic py-4">Sin rivales dominantes aún</p>}
+                        </div>
+                    </div>
+                </div>
+
                 {/* TAGGED HIGHLIGHTS SECTION */}
                 <div>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
@@ -304,19 +367,28 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                     {highlights.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
                             {highlights.map((h, i) => (
-                                <motion.div key={h.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} className="pwa-card !p-0 !rounded-[40px] group overflow-hidden border-white/5 hover:border-white/20">
+                                <motion.div key={h.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} className="pwa-card !p-0 !rounded-[40px] group overflow-hidden border-white/5 hover:border-white/20 relative">
                                     <div className="aspect-[9/16] relative bg-black/40">
                                         <div className="absolute top-6 left-6 z-20 flex gap-2">
-                                            <span className="pwa-pill !bg-black/60 backdrop-blur-md text-accent-lemon border-accent-lemon/40">{h.category}</span>
-                                            {h.match_date && <span className="pwa-pill !bg-black/60 backdrop-blur-md text-white/60 border-white/10">{h.match_date.split('-').reverse().slice(0, 2).join('/')}</span>}
+                                            <span className="pwa-pill !bg-black/60 backdrop-blur-md text-accent-lemon border-accent-lemon/40 text-[9px]">{h.category}</span>
+                                            {h.match_date && <span className="pwa-pill !bg-black/60 backdrop-blur-md text-white/60 border-white/10 text-[9px]">{h.match_date.split('-').reverse().slice(0, 2).join('/')}</span>}
                                         </div>
+
+                                        {/* LIKE BUTTON OVERLAY */}
+                                        <button
+                                            onClick={() => handleLike(h.id)}
+                                            className="absolute bottom-6 right-6 z-20 p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:scale-110 active:scale-95 transition-all text-white flex flex-col items-center gap-1 min-w-[50px]"
+                                        >
+                                            <Heart size={20} className={h.likes > 0 ? "fill-red-500 text-red-500" : "text-white"} />
+                                            <span className="text-[10px] font-black">{h.likes || 0}</span>
+                                        </button>
+
                                         <video src={h.video_url} className="w-full h-full object-cover" controls playsInline />
                                     </div>
                                     <div className="p-8 bg-white/[0.01]">
-                                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mb-4">Involucrados:</p>
                                         <div className="flex flex-wrap gap-2">
                                             {h.caption?.split(' de ')[1]?.split(', ').map((p: string) => (
-                                                <span key={p} className={`text-[9px] font-black px-2 py-1 rounded-md ${p === name ? 'text-accent-orange' : 'text-white/60'}`}>@{p}</span>
+                                                <Link href={`/players/${p}`} key={p} className={`text-[9px] font-black px-2 py-1 rounded-md transition-colors ${p === name ? 'text-accent-orange bg-accent-orange/10' : 'text-white/40 hover:text-white/80'}`}>@{p}</Link>
                                             ))}
                                         </div>
                                     </div>

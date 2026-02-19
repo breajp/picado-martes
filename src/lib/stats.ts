@@ -158,3 +158,52 @@ export function getMergedHistory(p1: string, p2: string, year?: number) {
 
     return combined;
 }
+export function getPlayerSynergy(name: string, year?: number) {
+    const synergy: Record<string, { games: number, wins: number }> = {};
+    const rivals: Record<string, { games: number, losses: number }> = {};
+
+    const matches = year ? HISTORICAL_MATCHES.filter(m => m.year === year) : HISTORICAL_MATCHES;
+
+    matches.forEach(match => {
+        const playerResult = match.results[name];
+        if (playerResult === undefined) return;
+
+        Object.entries(match.results).forEach(([otherPlayer, otherResult]) => {
+            if (otherPlayer === name) return;
+
+            if (playerResult === otherResult) {
+                // Partner
+                if (!synergy[otherPlayer]) synergy[otherPlayer] = { games: 0, wins: 0 };
+                synergy[otherPlayer].games++;
+                if (playerResult === 1) synergy[otherPlayer].wins++;
+            } else {
+                // Rival
+                if (!rivals[otherPlayer]) rivals[otherPlayer] = { games: 0, losses: 0 };
+                rivals[otherPlayer].games++;
+                if (playerResult === -1) rivals[otherPlayer].losses++;
+            }
+        });
+    });
+
+    const bestPartners = Object.entries(synergy)
+        .map(([playerName, data]) => ({
+            name: playerName,
+            winRate: (data.wins / data.games) * 100,
+            games: data.games
+        }))
+        .filter(p => p.games >= 2) // Mínimo 2 partidos juntos
+        .sort((a, b) => b.winRate - a.winRate || b.games - a.games)
+        .slice(0, 3);
+
+    const worstRivals = Object.entries(rivals)
+        .map(([playerName, data]) => ({
+            name: playerName,
+            lossRate: (data.losses / data.games) * 100,
+            games: data.games
+        }))
+        .filter(r => r.games >= 2)
+        .sort((a, b) => b.lossRate - a.lossRate || b.games - a.games)
+        .slice(0, 3);
+
+    return { bestPartners, worstRivals };
+}
