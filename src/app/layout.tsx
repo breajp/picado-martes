@@ -8,8 +8,17 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "FULBITO 4 EVER | Estadísticas de Fútbol",
-  description: "Seguimiento de rendimiento y estadísticas para el picado de los martes.",
+  title: "FULBITO FOR EVER",
+  description: "Estadísticas y perfiles del picado de los martes.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Fulbito",
+  },
+  icons: {
+    apple: "/icons/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
