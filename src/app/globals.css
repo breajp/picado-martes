@@ -1,48 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
 
-:root {
-  --bg: #0c0c0e;
-  --fg: #ffffff;
-  --accent-pink: #ff61d8;
-  --accent-lemon: #e6ff55;
-  --accent-blue: #55daff;
-  --accent-purple: #c261ff;
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
+@theme {
+  --color-bg: #0c0c0e;
+  --color-fg: #ffffff;
+  --color-accent-pink: #ff61d8;
+  --color-accent-lemon: #e6ff55;
+  --color-accent-blue: #55daff;
+  --color-accent-purple: #c261ff;
   --font-sans: 'Outfit', sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+@layer base {
+  :root {
+    --bg: #0c0c0e;
+    --fg: #ffffff;
+    --accent-pink: #ff61d8;
+    --accent-lemon: #e6ff55;
+    --accent-blue: #55daff;
+    --accent-purple: #c261ff;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 }
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-sans);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+@layer components {
+
+  /* Glassmorphism System */
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-[30px] border border-white/[0.08] rounded-[40px] transition-all duration-500 ease-[cubic-bezier(0.2, 1, 0.3, 1)] overflow-hidden;
+  }
+
+  .glass-card:hover {
+    @apply bg-white/[0.06] border-white/20 -translate-y-2;
+  }
+
+  .glass-pill {
+    @apply bg-white/[0.05] backdrop-blur-[20px] border border-white/[0.08] rounded-full shadow-2xl flex items-center;
+  }
+
+  .btn-modern {
+    @apply bg-white text-black font-bold px-10 py-5 rounded-full transition-all duration-300 flex items-center gap-3 hover:scale-105 hover:shadow-[0_0_20px_rgba(255, 255, 255, 0.2)] active:scale-95;
+  }
+
+  .title-huge {
+    @apply font-black italic uppercase leading-[0.85] tracking-tighter;
+    font-size: clamp(3rem, 12vw, 8rem);
+  }
+
+  .subtitle {
+    @apply text-white/60 font-light leading-relaxed tracking-wide;
+    font-size: 1.125rem;
+  }
+
+  .scene-bg {
+    @apply fixed inset-0 -z-10 bg-bg overflow-hidden;
+  }
+
+  .glow-blob {
+    @apply absolute blur-[120px] rounded-full opacity-[0.15] pointer-events-none;
+    animation: blob-pulse 15s infinite alternate;
+  }
 }
 
-/* Background Engine */
-.scene-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: var(--bg);
+@keyframes blob-pulse {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(50px, 30px) scale(1.1);
+  }
 }
 
-.glow-blob {
-  position: absolute;
-  filter: blur(120px);
-  border-radius: 50%;
-  opacity: 0.15;
-  animation: pulse 15s infinite alternate;
-}
-
+/* Custom Overrides */
 .blob-pink {
   background: var(--accent-pink);
   width: 600px;
@@ -67,84 +103,4 @@ body {
   top: 30%;
   right: 20%;
   animation-delay: -10s;
-}
-
-@keyframes pulse {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  100% {
-    transform: translate(50px, 30px) scale(1.1);
-  }
-}
-
-/* Premium Components */
-.glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(30px);
-  border: 1px solid var(--glass-border);
-  border-radius: 40px;
-  transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-}
-
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-8px);
-}
-
-/* Typography */
-.title-huge {
-  font-weight: 900;
-  font-size: clamp(3rem, 12vw, 8rem);
-  letter-spacing: -0.05em;
-  line-height: 0.85;
-  text-transform: uppercase;
-}
-
-.subtitle {
-  font-size: 1.125rem;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.02em;
-}
-
-/* Buttons */
-.btn-modern {
-  @apply glass-pill px-10 py-5 transition-all active:scale-95;
-  background: white;
-  color: black;
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.btn-modern-dark {
-  @apply glass-pill px-10 py-5 transition-all hover:bg-white hover:text-black;
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  font-weight: 600;
-}
-
-/* Tablestyling inspired by UI-KIT */
-.premium-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 12px;
-}
-
-.premium-table tr {
-  @apply glass-card;
-}
-
-.premium-table td {
-  @apply py-6 px-8 bg-transparent;
 }

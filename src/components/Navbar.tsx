@@ -8,25 +8,25 @@ export default function Navbar() {
     const pathname = usePathname();
 
     const links = [
-        { href: '/', label: 'Journal' },
-        { href: '/players', label: 'Roster' },
-        { href: '/vs', label: 'VS Mode' },
-        { href: '/admin', label: 'Console' },
+        { href: '/', label: 'HOME' },
+        { href: '/players', label: 'ROSTER' },
+        { href: '/vs', label: 'VS MODE' },
+        { href: '/admin', label: 'CONSOLE' },
     ];
 
     return (
-        <nav className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-[440px]">
-            <div className="glass-pill px-8 py-5 flex justify-between items-center text-white/50">
+        <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-[420px]">
+            <div className="glass-pill px-6 py-4 flex justify-between items-center text-white/40">
                 {links.map(({ href, label }) => (
-                    <Link key={href} href={href} className="relative px-3 py-1">
-                        <span className={`text-xs font-semibold tracking-wide transition-all duration-300 ${pathname === href ? 'text-white' : 'hover:text-white'}`}>
+                    <Link key={href} href={href} className="relative px-4 py-2 flex items-center justify-center">
+                        <span className={`text-[10px] sm:text-[11px] font-black tracking-widest transition-all duration-300 ${pathname === href ? 'text-white' : 'hover:text-white'}`}>
                             {label}
                         </span>
                         {pathname === href && (
                             <motion.div
-                                layoutId="nav-pill"
+                                layoutId="nav-pill-bg"
                                 className="absolute inset-0 bg-white/10 rounded-full -z-10"
-                                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
                             />
                         )}
                     </Link>
