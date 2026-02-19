@@ -78,3 +78,22 @@ export function getHeadToHead(p1: string, p2: string) {
         p2WinsAgainst
     };
 }
+
+export function getPlayerHistory(name: string) {
+    let wins = 0;
+    let games = 0;
+
+    // Sort matches by date if they weren't
+    const history = HISTORICAL_MATCHES
+        .filter(m => m.results[name] !== undefined)
+        .map(m => {
+            if (m.results[name] === 1) wins++;
+            games++;
+            return {
+                date: m.date.split('-').slice(1).join('/'), // DD/MM format
+                winRate: Math.round((wins / games) * 100)
+            };
+        });
+
+    return history;
+}

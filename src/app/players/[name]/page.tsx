@@ -1,117 +1,149 @@
 'use client';
 
-import { use } from 'react';
+import { use, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
-import { getLeaderboard, getHeadToHead } from '@/lib/stats';
+import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { Trophy, Target, Zap, Activity, ChevronRight, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield } from 'lucide-react';
 import Link from 'next/link';
+import PerformanceChart from '@/components/PerformanceChart';
 
 export default function PlayerProfile({ params }: { params: Promise<{ name: string }> }) {
     const { name } = use(params);
-    const stats = getLeaderboard().find(p => p.name === name);
+    const leaderboard = getLeaderboard();
+    const playerStats = leaderboard.find(p => p.name === name);
     const metadata = getPlayerMetadata(name);
+    const history = useMemo(() => getPlayerHistory(name), [name]);
 
-    if (!stats) return <div>Player not found</div>;
+    if (!playerStats) return <div className="p-20 text-white">Player not found</div>;
 
     return (
-        <main className="min-h-screen relative pb-40 lg:pl-32">
+        <main className="min-h-screen relative pb-40">
             <Navbar />
 
-            {/* Editorial Header */}
-            <section className="relative h-[80vh] flex items-end p-6 sm:p-20 overflow-hidden">
-                <div className="absolute inset-x-0 top-0 h-full">
+            {/* PWA Backdrop Orbs */}
+            <div className="pwa-mesh">
+                <div className="mesh-orb-1 opacity-20" />
+                <div className="mesh-orb-2 opacity-20" />
+            </div>
+
+            {/* MOBILE-FIRST HEADER */}
+            <section className="relative h-[65vh] flex items-end p-6 sm:p-12 overflow-hidden">
+                <div className="absolute inset-0 z-0">
                     <img
                         src={metadata.photo}
                         alt={name}
-                        className="w-full h-full object-cover grayscale opacity-40 mix-blend-overlay"
+                        className="w-full h-full object-cover grayscale opacity-50 transition-all duration-1000"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-transparent" />
                 </div>
 
-                <div className="relative z-10 w-full max-w-7xl mx-auto">
+                <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start">
+                    <Link href="/players" className="mb-12 pwa-pill flex items-center gap-2 hover:bg-white/10 transition-all">
+                        <ArrowLeft size={14} /> Back to Roster
+                    </Link>
+
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col items-start"
+                        className="w-full"
                     >
-                        <div className="flex items-center gap-4 mb-8">
-                            <span className="bg-accent text-black px-4 py-1 text-[10px] font-black uppercase tracking-widest">Profile No. {stats.name}</span>
-                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Active Member Since Jan 2025</span>
-                        </div>
+                        <div className="flex justify-between items-end w-full">
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="pwa-pill text-accent-orange border-accent-orange/30">ELITE TIER</span>
+                                    <span className="text-white/40 text-[9px] font-black uppercase tracking-widest italic">Member 2025</span>
+                                </div>
+                                <h1 className="pwa-title text-8xl sm:text-[12vw]">{name}</h1>
+                                <p className="text-sm font-black text-white/30 uppercase tracking-[0.4em] mt-4 italic">
+                                    Playstyle: <span className="text-white italic">{metadata.role}</span>
+                                </p>
+                            </div>
 
-                        <h1 className="text-[15vw] display-bold leading-none mb-4 -ml-2">{name}</h1>
-
-                        <div className="flex gap-12 text-sm font-black uppercase tracking-widest text-gray-400 italic">
-                            <p>Playstyle: <span className="text-white">{metadata.role}</span></p>
-                            <p>Comparison: <span className="text-white">vs {metadata.famousCounterpart}</span></p>
-                            <p>Region: <span className="text-white">{metadata.nationality}</span></p>
+                            <div className="hidden sm:block text-right">
+                                <div className="pwa-card p-6 bg-white/5 border-none">
+                                    <p className="pwa-subtitle mb-1">vs Archetype</p>
+                                    <p className="text-xl font-black italic">{metadata.famousCounterpart}</p>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* Stats Grid */}
-            <section className="px-6 sm:px-20 max-w-7xl mx-auto -mt-20 relative z-20">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* PERFORMANCE ANALYTICS SECTION */}
+            <section className="px-6 sm:px-12 max-w-7xl mx-auto mt-12 space-y-8">
 
-                    {/* Primary Stats */}
-                    <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-1">
-                        {[
-                            { label: 'Efectividad', value: `${stats.winRate.toFixed(1)}%`, icon: Target },
-                            { label: 'Puntos Totales', value: stats.points, icon: Zap },
-                            { label: 'Partidos Jugados', value: stats.totalGames, icon: Activity }
-                        ].map((item, i) => (
-                            <motion.div
-                                key={item.label}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="super-glass p-12 text-center"
-                            >
-                                <item.icon className="mx-auto mb-6 text-accent" size={32} />
-                                <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2">{item.label}</p>
-                                <p className="text-5xl font-display text-white italic">{item.value}</p>
-                            </motion.div>
-                        ))}
+                {/* KPI DASHBOARD */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                        <Target size={20} className="text-accent-orange" />
+                        <div>
+                            <p className="pwa-subtitle">Global Rank</p>
+                            <h4 className="text-4xl font-black italic">#{leaderboard.findIndex(p => p.name === name) + 1}</h4>
+                        </div>
+                    </div>
+                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                        <Zap size={20} className="text-accent-lemon" />
+                        <div>
+                            <p className="pwa-subtitle">Win Rate</p>
+                            <h4 className="text-4xl font-black italic text-accent-lemon">{playerStats.winRate.toFixed(0)}%</h4>
+                        </div>
+                    </div>
+                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                        <Activity size={20} className="text-accent-blue" />
+                        <div>
+                            <p className="pwa-subtitle">Impact Score</p>
+                            <h4 className="text-4xl font-black italic">{playerStats.points}</h4>
+                        </div>
+                    </div>
+                    <div className="pwa-card p-8 flex flex-col justify-between h-[180px]">
+                        <Shield size={20} className="text-white/20" />
+                        <div>
+                            <p className="pwa-subtitle">Matches</p>
+                            <h4 className="text-4xl font-black italic">{playerStats.totalGames}</h4>
+                        </div>
+                    </div>
+                </div>
+
+                {/* TIME SERIES CHART */}
+                <div className="pwa-card p-10 bg-white/[0.01]">
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 className="text-xl font-black italic uppercase tracking-tighter">Performance Track</h3>
+                            <p className="pwa-subtitle">Evolution of win rate over 2025 season</p>
+                        </div>
+                        <div className="pwa-pill">Efficacy X Timeline</div>
                     </div>
 
-                    {/* Performance Card */}
-                    <div className="lg:col-span-4 super-glass p-12">
-                        <h3 className="display-bold text-3xl mb-8">RANKING<br />ANALYSIS</h3>
-                        <div className="space-y-8">
-                            <div className="flex justify-between items-end border-b border-white/5 pb-4">
-                                <span className="text-[10px] font-black text-gray-500 uppercase">Season 2025 Rank</span>
-                                <span className="text-3xl font-display text-accent italic">Elite tier</span>
+                    <PerformanceChart data={history} />
+
+                    <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-8">
+                        <div>
+                            <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Intensity</p>
+                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-accent-orange" style={{ width: `${metadata.intensity}%` }} />
                             </div>
-                            <div className="flex justify-between items-end border-b border-white/5 pb-4">
-                                <span className="text-[10px] font-black text-gray-500 uppercase">Win Streak</span>
-                                <span className="text-3xl font-display text-white italic">🔥 3 LAPS</span>
-                            </div>
-                            <div className="flex justify-between items-end border-b border-white/5 pb-4">
-                                <span className="text-[10px] font-black text-gray-500 uppercase">Trend</span>
-                                <TrendingUp className="text-emerald-400" size={32} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Creativity</p>
+                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-accent-blue" style={{ width: `${metadata.creativity}%` }} />
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            {/* Footer Navigation */}
-            <section className="mt-40 px-6 sm:px-20 max-w-7xl mx-auto">
-                <div className="flex flex-col sm:flex-row gap-8">
+                {/* ACTION / SHARE */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-12">
+                    <button className="flex-1 pwa-btn">
+                        <Share2 size={16} /> Export Performance Report
+                    </button>
                     <Link href="/vs" className="flex-1">
-                        <div className="super-glass p-12 group hover:border-accent transition-all">
-                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-4">Go to Comparison</p>
-                            <h4 className="text-4xl display-bold group-hover:text-accent transition-colors">COMPARE WITH OTHERS</h4>
-                        </div>
-                    </Link>
-                    <Link href="/players" className="flex-1">
-                        <div className="super-glass p-12 group hover:border-white transition-all">
-                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-4">Back to List</p>
-                            <h4 className="text-4xl display-bold">VIEW ALL ROSTER</h4>
-                        </div>
+                        <button className="w-full btn-modern-dark">
+                            Duel Comparison Mode
+                        </button>
                     </Link>
                 </div>
             </section>
