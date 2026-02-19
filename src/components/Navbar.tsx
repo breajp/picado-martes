@@ -10,23 +10,29 @@ export default function Navbar() {
     const links = [
         { href: '/', label: 'HOME' },
         { href: '/players', label: 'ROSTER' },
-        { href: '/vs', label: 'VS MODE' },
-        { href: '/admin', label: 'CONSOLE' },
+        { href: '/vs', label: 'DUELS' },
+        { href: '/admin', label: 'SYSTEM' },
     ];
 
     return (
-        <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-[420px]">
-            <div className="glass-pill px-6 py-4 flex justify-between items-center text-white/40">
+        <nav className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-[400px]">
+            <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-full px-4 py-3 flex justify-between items-center shadow-2xl">
                 {links.map(({ href, label }) => (
-                    <Link key={href} href={href} className="relative px-4 py-2 flex items-center justify-center">
-                        <span className={`text-[10px] sm:text-[11px] font-black tracking-widest transition-all duration-300 ${pathname === href ? 'text-white' : 'hover:text-white'}`}>
+                    <Link key={href} href={href} className="relative px-5 py-2 group">
+                        <span className={`text-[9px] font-black tracking-[0.2em] transition-all duration-300 ${pathname === href ? 'text-white' : 'text-white/30 group-hover:text-white/60'}`}>
                             {label}
                         </span>
                         {pathname === href && (
                             <motion.div
-                                layoutId="nav-pill-bg"
-                                className="absolute inset-0 bg-white/10 rounded-full -z-10"
+                                layoutId="nav-pill-active"
+                                className="absolute inset-0 bg-white/[0.08] rounded-full -z-10"
                                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            />
+                        )}
+                        {pathname === href && (
+                            <motion.div
+                                layoutId="nav-dot"
+                                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full"
                             />
                         )}
                     </Link>

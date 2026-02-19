@@ -1,106 +1,108 @@
-@import "tailwindcss";
-
-@theme {
-  --color-bg: #0c0c0e;
-  --color-fg: #ffffff;
-  --color-accent-pink: #ff61d8;
-  --color-accent-lemon: #e6ff55;
-  --color-accent-blue: #55daff;
-  --color-accent-purple: #c261ff;
-  --font-sans: 'Outfit', sans-serif;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
-    --bg: #0c0c0e;
+    --bg: #050505;
     --fg: #ffffff;
-    --accent-pink: #ff61d8;
-    --accent-lemon: #e6ff55;
-    --accent-blue: #55daff;
-    --accent-purple: #c261ff;
+    --accent-orange: #ff7e4b;
+    --accent-blue: #0070f3;
+    --accent-pink: #ff0080;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
   }
 
   body {
     background-color: var(--bg);
     color: var(--fg);
-    font-family: var(--font-sans);
+    font-family: 'Outfit', sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    min-height: 100vh;
   }
 }
 
 @layer components {
 
-  /* Glassmorphism System */
-  .glass-card {
-    @apply bg-white/[0.03] backdrop-blur-[30px] border border-white/[0.08] rounded-[40px] transition-all duration-500 ease-[cubic-bezier(0.2, 1, 0.3, 1)] overflow-hidden;
+  /* MESH BACKGROUND - THE "ORBS" FROM PINTEREST */
+  .pwa-mesh {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: #050505;
+    overflow: hidden;
   }
 
-  .glass-card:hover {
-    @apply bg-white/[0.06] border-white/20 -translate-y-2;
+  .mesh-orb-1 {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--accent-orange) 0%, transparent 70%);
+    filter: blur(80px);
+    top: -200px;
+    left: -100px;
+    opacity: 0.4;
+    animation: floating 20s infinite alternate;
   }
 
-  .glass-pill {
-    @apply bg-white/[0.05] backdrop-blur-[20px] border border-white/[0.08] rounded-full shadow-2xl flex items-center;
+  .mesh-orb-2 {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+    filter: blur(100px);
+    bottom: -100px;
+    right: -100px;
+    opacity: 0.3;
+    animation: floating 25s infinite alternate-reverse;
   }
 
-  .btn-modern {
-    @apply bg-white text-black font-bold px-10 py-5 rounded-full transition-all duration-300 flex items-center gap-3 hover:scale-105 hover:shadow-[0_0_20px_rgba(255, 255, 255, 0.2)] active:scale-95;
+  @keyframes floating {
+    from {
+      transform: translate(0, 0) scale(1);
+    }
+
+    to {
+      transform: translate(100px, 50px) scale(1.1);
+    }
   }
 
-  .title-huge {
-    @apply font-black italic uppercase leading-[0.85] tracking-tighter;
-    font-size: clamp(3rem, 12vw, 8rem);
+  /* PWA CONTENT CARDS */
+  .pwa-card {
+    @apply bg-white/[0.03] backdrop-blur-[40px] border border-white/[0.08] rounded-[32px] overflow-hidden transition-all duration-500;
   }
 
-  .subtitle {
-    @apply text-white/60 font-light leading-relaxed tracking-wide;
-    font-size: 1.125rem;
+  .pwa-card:hover {
+    @apply border-white/20 bg-white/[0.06] -translate-y-1;
   }
 
-  .scene-bg {
-    @apply fixed inset-0 -z-10 bg-bg overflow-hidden;
+  /* BUTTONS & PILLS */
+  .pwa-btn {
+    @apply bg-white text-black font-black uppercase tracking-widest text-[10px] px-8 py-4 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2;
   }
 
-  .glow-blob {
-    @apply absolute blur-[120px] rounded-full opacity-[0.15] pointer-events-none;
-    animation: blob-pulse 15s infinite alternate;
+  .pwa-pill {
+    @apply bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-white/40;
+  }
+
+  /* TYPOGRAPHY */
+  .pwa-title {
+    @apply font-black italic uppercase tracking-tighter leading-[0.85];
+    font-size: clamp(3rem, 10vw, 7rem);
+  }
+
+  .pwa-subtitle {
+    @apply text-white/40 font-medium text-sm tracking-wide uppercase;
   }
 }
 
-@keyframes blob-pulse {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  100% {
-    transform: translate(50px, 30px) scale(1.1);
-  }
+/* Glassmorphism Fixes */
+.glass-effect {
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
 }
 
-/* Custom Overrides */
-.blob-pink {
-  background: var(--accent-pink);
-  width: 600px;
-  height: 600px;
-  top: -200px;
-  right: -100px;
-}
-
-.blob-blue {
-  background: var(--accent-blue);
-  width: 500px;
-  height: 500px;
-  bottom: 0;
-  left: -100px;
-  animation-delay: -5s;
-}
-
-.blob-lemon {
-  background: var(--accent-lemon);
-  width: 300px;
-  height: 300px;
-  top: 30%;
-  right: 20%;
-  animation-delay: -10s;
+.mask-image-fade {
+  mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
 }
