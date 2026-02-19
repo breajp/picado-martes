@@ -43,24 +43,28 @@ export default function Leaderboard({ year }: LeaderboardProps) {
 
     return (
         <div className="w-full">
-            <div className="hidden sm:grid grid-cols-12 px-10 py-6 text-white/20 text-[9px] font-black uppercase tracking-[0.3em] bg-white/[0.01]">
-                <div className="col-span-1">Pos</div>
-                <div className="col-span-3 cursor-pointer hover:text-white transition-colors flex items-center gap-1 group" onClick={() => handleSort('totalGames')}>
+            {/* Header - Ahora visible en mobile de forma simplificada */}
+            <div className="grid grid-cols-12 px-6 sm:px-10 py-6 text-white/20 text-[9px] font-black uppercase tracking-[0.3em] bg-white/[0.01] border-b border-white/5">
+                <div className="col-span-1">#</div>
+                <div className="col-span-5 sm:col-span-3 cursor-pointer hover:text-white transition-colors flex items-center gap-1 group" onClick={() => handleSort('totalGames')}>
                     Jugador <SortIcon column="totalGames" />
                 </div>
-                <div className="col-span-1 text-center cursor-pointer hover:text-white transition-colors flex items-center justify-center gap-1 group" onClick={() => handleSort('points')}>
+                <div className="col-span-2 sm:col-span-1 text-center cursor-pointer hover:text-white transition-colors flex items-center justify-center gap-1 group" onClick={() => handleSort('totalGames')}>
+                    PJ <SortIcon column="totalGames" />
+                </div>
+                <div className="col-span-2 sm:col-span-1 text-center cursor-pointer hover:text-white transition-colors flex items-center justify-center gap-1 group" onClick={() => handleSort('points')}>
                     Pts <SortIcon column="points" />
                 </div>
-                <div className="col-span-1 text-center cursor-pointer hover:text-white transition-colors flex items-center justify-center gap-1 group" onClick={() => handleSort('wins')}>
+                <div className="hidden sm:flex col-span-1 text-center cursor-pointer hover:text-white transition-colors items-center justify-center gap-1 group" onClick={() => handleSort('wins')}>
                     W <SortIcon column="wins" />
                 </div>
-                <div className="col-span-1 text-center cursor-pointer hover:text-white transition-colors flex items-center justify-center gap-1 group" onClick={() => handleSort('losses')}>
+                <div className="hidden sm:flex col-span-1 text-center cursor-pointer hover:text-white transition-colors items-center justify-center gap-1 group" onClick={() => handleSort('losses')}>
                     L <SortIcon column="losses" />
                 </div>
                 <div className="col-span-2 text-center cursor-pointer hover:text-white transition-colors flex items-center justify-center gap-1 group" onClick={() => handleSort('winRate')}>
-                    % Win <SortIcon column="winRate" />
+                    % <SortIcon column="winRate" />
                 </div>
-                <div className="col-span-3 text-right cursor-pointer hover:text-white transition-colors flex items-center justify-end gap-1 group" onClick={() => handleSort('morfiRate')}>
+                <div className="hidden sm:flex col-span-2 text-right cursor-pointer hover:text-white transition-colors items-center justify-end gap-1 group" onClick={() => handleSort('morfiRate')}>
                     Morfi <SortIcon column="morfiRate" />
                 </div>
             </div>
@@ -73,26 +77,30 @@ export default function Leaderboard({ year }: LeaderboardProps) {
                             whileInView={{ opacity: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.01 }}
-                            className="grid grid-cols-12 px-8 sm:px-10 py-7 items-center group hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            className="grid grid-cols-12 px-6 sm:px-10 py-6 sm:py-7 items-center group hover:bg-white/[0.02] transition-colors cursor-pointer relative"
                         >
-                            <div className="col-span-1 font-black text-white/10 text-xs italic">
+                            <div className="col-span-1 font-black text-white/10 text-[10px] sm:text-xs italic tabular-nums">
                                 {(index + 1).toString().padStart(2, '0')}
                             </div>
 
-                            <div className="col-span-5 sm:col-span-3 flex items-center gap-5">
-                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center font-bold text-sm group-hover:bg-white group-hover:text-black transition-all">
+                            <div className="col-span-5 sm:col-span-3 flex items-center gap-3 sm:gap-5">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/5 border border-white/5 flex items-center justify-center font-bold text-xs sm:text-sm group-hover:bg-white group-hover:text-black transition-all shrink-0">
                                     {player.name[0]}
                                 </div>
-                                <div className="hidden sm:block">
-                                    <h4 className="text-base font-black tracking-tight group-hover:text-white transition-colors uppercase italic">{player.name}</h4>
-                                    <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-0.5">{player.totalGames} Partidos</p>
-                                </div>
-                                <div className="sm:hidden">
-                                    <h4 className="text-base font-black tracking-tight group-hover:text-white transition-colors uppercase italic">{player.name}</h4>
+                                <div className="min-w-0">
+                                    <h4 className="text-sm sm:text-base font-black tracking-tight group-hover:text-white transition-colors uppercase italic truncate">{player.name}</h4>
+                                    {/* Morfi Bar for mobile - absolute or relative below */}
+                                    <div className="sm:hidden mt-1 w-12 h-0.5 bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-accent-lemon" style={{ width: `${player.morfiRate}%` }} />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="col-span-1 text-center text-xl font-black tabular-nums italic">
+                            <div className="col-span-2 sm:col-span-1 text-center text-sm sm:text-lg font-black tabular-nums opacity-60 sm:opacity-100">
+                                {player.totalGames}
+                            </div>
+
+                            <div className="col-span-2 sm:col-span-1 text-center text-sm sm:text-xl font-black tabular-nums italic">
                                 {player.points}
                             </div>
 
@@ -104,25 +112,22 @@ export default function Leaderboard({ year }: LeaderboardProps) {
                                 {player.losses}
                             </div>
 
-                            <div className="col-span-2 text-center text-xl font-black tabular-nums italic text-accent-orange">
+                            <div className="col-span-2 text-center text-sm sm:text-xl font-black tabular-nums italic text-accent-orange">
                                 {player.winRate.toFixed(0)}%
                             </div>
 
-                            <div className="col-span-4 sm:col-span-3 text-right">
-                                <div className="flex flex-col items-end gap-1.5 font-black">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-white/40 uppercase tracking-widest leading-none mt-1 hidden lg:inline">Comprometido</span>
-                                        <span className={`text-xl tabular-nums italic ${player.morfiRate >= 70 ? 'text-accent-lemon' : player.morfiRate < 30 ? 'text-red-500' : 'text-white'}`}>
-                                            {player.morfiRate.toFixed(0)}%
-                                        </span>
-                                    </div>
-                                    <div className="w-16 sm:w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            whileInView={{ width: `${player.morfiRate}%` }}
-                                            className="h-full bg-accent-lemon"
-                                        />
-                                    </div>
+                            <div className="hidden sm:flex col-span-2 text-right flex-col items-end gap-1.5 font-black">
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-xl tabular-nums italic ${player.morfiRate >= 70 ? 'text-accent-lemon' : player.morfiRate < 30 ? 'text-red-500' : 'text-white'}`}>
+                                        {player.morfiRate.toFixed(0)}%
+                                    </span>
+                                </div>
+                                <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${player.morfiRate}%` }}
+                                        className="h-full bg-accent-lemon"
+                                    />
                                 </div>
                             </div>
                         </motion.div>
