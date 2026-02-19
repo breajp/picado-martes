@@ -5,14 +5,16 @@ import Navbar from '@/components/Navbar';
 import { getLeaderboard, getPlayerHistory } from '@/lib/stats';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera } from 'lucide-react';
+import { ArrowLeft, Share2, Activity, Target, Zap, Shield, Camera, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import PerformanceChart from '@/components/PerformanceChart';
+import { supabase } from '@/lib/supabase';
 
 export default function PlayerProfile({ params }: { params: Promise<{ name: string }> }) {
     const { name } = use(params);
     const [year, setYear] = useState<number>(2025);
     const [displayPhoto, setDisplayPhoto] = useState<string>("");
+    const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const leaderboard = getLeaderboard(year);
@@ -21,20 +23,58 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
     const history = useMemo(() => getPlayerHistory(name, year), [name, year]);
 
     useEffect(() => {
-        const custom = localStorage.getItem(`photo_${name}`);
-        setDisplayPhoto(custom || metadata.photo);
+        async function fetchPhoto() {
+            const { data, error } = await supabase
+                .from('player_profiles')
+                .select('photo_url')
+                .eq('name', name)
+                .single();
+
+            if (data?.photo_url) {
+                setDisplayPhoto(data.photo_url);
+            } else {
+                setDisplayPhoto(metadata.photo);
+            }
+        }
+        fetchPhoto();
     }, [name, metadata.photo]);
 
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64 = reader.result as string;
-                localStorage.setItem(`photo_${name}`, base64);
-                setDisplayPhoto(base64);
-            };
-            reader.readAsDataURL(file);
+        if (!file || !supabase) return;
+
+        try {
+            setUploading(true);
+
+            // 1. Upload to Supabase Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${name}-${Math.random()}.${fileExt}`;
+            const filePath = `avatars/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('player-photos')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            // 2. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('player-photos')
+                .getPublicUrl(filePath);
+
+            // 3. Update Database (Upsert)
+            const { error: dbError } = await supabase
+                .from('player_profiles')
+                .upsert({ name, photo_url: publicUrl }, { onConflict: 'name' });
+
+            if (dbError) throw dbError;
+
+            setDisplayPhoto(publicUrl);
+        } catch (error) {
+            console.error('Error uploading photo:', error);
+            alert('Error al subir la foto. Asegurate de tener configurado Supabase.');
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -63,9 +103,11 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                 <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-sm">
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all scale-95 hover:scale-100"
+                        disabled={uploading}
+                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 disabled:opacity-50"
                     >
-                        <Camera size={18} /> Cambiar Foto de Perfil
+                        {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                        {uploading ? 'Subiendo...' : 'Cambiar Foto de Perfil'}
                     </button>
                     <input
                         type="file"
@@ -97,13 +139,6 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                                     Estilo: <span className="text-white italic">{metadata.role}</span>
                                 </p>
                             </div>
-
-                            <div className="hidden sm:block text-right">
-                                <div className="pwa-card p-6 bg-white/5 border-none">
-                                    <p className="pwa-subtitle mb-1">vs Arquetipo</p>
-                                    <p className="text-xl font-black italic">{metadata.famousCounterpart}</p>
-                                </div>
-                            </div>
                         </div>
                     </motion.div>
                 </div>
@@ -111,7 +146,6 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
 
             {/* PERFORMANCE ANALYTICS SECTION */}
             <section className="px-6 sm:px-12 max-w-7xl mx-auto mt-12 space-y-8">
-
                 {/* YEAR SELECTOR */}
                 <div className="flex justify-center mb-12">
                     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 flex gap-1">
@@ -176,18 +210,6 @@ export default function PlayerProfile({ params }: { params: Promise<{ name: stri
                             Sin actividad en {year}
                         </div>
                     )}
-                </div>
-
-                {/* ACTION / SHARE */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-12">
-                    <button className="flex-1 pwa-btn">
-                        <Share2 size={16} /> Exportar Reporte {year}
-                    </button>
-                    <Link href="/vs" className="flex-1">
-                        <button className="w-full h-full py-5 rounded-full border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 transition-all">
-                            Modo Comparación de Duelos
-                        </button>
-                    </Link>
                 </div>
             </section>
         </main>

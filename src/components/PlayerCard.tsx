@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { getPlayerMetadata } from '@/data/playerMetadata';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface PlayerCardProps {
     name: string;
@@ -22,8 +22,20 @@ export default function PlayerCard({ name, rank, stats }: PlayerCardProps) {
     const [displayPhoto, setDisplayPhoto] = useState(metadata.photo);
 
     useEffect(() => {
-        const custom = localStorage.getItem(`photo_${name}`);
-        if (custom) setDisplayPhoto(custom);
+        async function fetchPhoto() {
+            if (!supabase) return;
+
+            const { data, error } = await supabase
+                .from('player_profiles')
+                .select('photo_url')
+                .eq('name', name)
+                .single();
+
+            if (data?.photo_url) {
+                setDisplayPhoto(data.photo_url);
+            }
+        }
+        fetchPhoto();
     }, [name]);
 
     return (
@@ -48,7 +60,6 @@ export default function PlayerCard({ name, rank, stats }: PlayerCardProps) {
                         <span className="text-[10px] font-black italic text-white/30 tracking-[0.3em]">
                             #{rank.toString().padStart(2, '0')}
                         </span>
-                        <ArrowUpRight className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
                     </div>
 
                     <div>
