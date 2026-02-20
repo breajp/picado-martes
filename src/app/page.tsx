@@ -15,6 +15,48 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getGlobalStats, getLeaderboard } from '@/lib/stats';
+import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
+
+function PlayerBubble({ player, index }: { player: any, index: number }) {
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPhoto() {
+      if (!supabase) return;
+      const { data } = await supabase
+        .from('player_profiles')
+        .select('photo_url')
+        .eq('name', player.name)
+        .single();
+      if (data?.photo_url) setPhoto(data.photo_url);
+    }
+    fetchPhoto();
+  }, [player.name]);
+
+  return (
+    <Link href={`/players/${player.name}`}>
+      <motion.div
+        whileTap={{ scale: 0.9 }}
+        className="flex flex-col items-center gap-3 min-w-[80px]"
+      >
+        <div className="w-20 h-20 rounded-full bg-gradient-to-b from-white/10 to-transparent border border-white/5 flex items-center justify-center relative overflow-hidden">
+          {photo ? (
+            <img src={photo} alt={player.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-2xl font-black italic text-white/20 uppercase">{player.name[0]}</span>
+          )}
+          {index < 3 && (
+            <div className="absolute top-1 right-1 w-5 h-5 bg-accent-orange rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+              <span className="text-[8px] font-black text-black">{index + 1}</span>
+            </div>
+          )}
+        </div>
+        <span className="text-[10px] font-black italic uppercase truncate w-20 text-center">{player.name}</span>
+      </motion.div>
+    </Link>
+  );
+}
 
 export default function Home() {
   const year = 2025;
@@ -120,22 +162,7 @@ export default function Home() {
           </div>
           <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6">
             {leaderboard.slice(0, 8).map((player, i) => (
-              <Link key={player.name} href={`/players/${player.name}`}>
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className="flex flex-col items-center gap-3 min-w-[80px]"
-                >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-b from-white/10 to-transparent border border-white/5 flex items-center justify-center relative overflow-hidden">
-                    <span className="text-2xl font-black italic text-white/20 uppercase">{player.name[0]}</span>
-                    {i < 3 && (
-                      <div className="absolute top-1 right-1 w-5 h-5 bg-accent-orange rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
-                        <span className="text-[8px] font-black text-black">{i + 1}</span>
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-[10px] font-black italic uppercase truncate w-20 text-center">{player.name}</span>
-                </motion.div>
-              </Link>
+              <PlayerBubble key={player.name} player={player} index={i} />
             ))}
           </div>
         </section>
