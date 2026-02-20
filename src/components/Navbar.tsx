@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home as HomeIcon, Trophy, Users, Zap, History, LayoutDashboard } from 'lucide-react';
+import { Home as HomeIcon, Trophy, Users, Zap, Film } from 'lucide-react';
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -11,10 +11,9 @@ export default function Navbar() {
     const links = [
         { href: '/', label: 'Home', icon: HomeIcon },
         { href: '/leaderboard', label: 'Tabla', icon: Trophy },
+        { href: '/feed', label: 'Videos', icon: Film },
         { href: '/players', label: 'Plantel', icon: Users },
         { href: '/vs', label: 'Duelos', icon: Zap },
-        { href: '/history', label: 'Historial', icon: History },
-        { href: '/admin', label: 'Admin', icon: LayoutDashboard },
     ];
 
     return (
