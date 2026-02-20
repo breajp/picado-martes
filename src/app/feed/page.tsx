@@ -237,7 +237,7 @@ export default function FeedPage() {
                         {/* Bottom Gradient for text readability */}
                         <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
-                        /* INFO OVERLAYS */
+                        {/* INFO OVERLAYS */}
                         <div className="absolute bottom-[100px] left-4 right-16 z-20">
                             <h3 className="text-xl font-black italic uppercase drop-shadow-lg">{highlight.player_name}</h3>
                             <p className="text-xs font-bold text-white/80 drop-shadow-md mt-1">
@@ -245,7 +245,7 @@ export default function FeedPage() {
                             </p>
                         </div>
 
-                        /* ACTION BUTTONS (Right Side) */
+                        {/* ACTION BUTTONS (Right Side) */}
                         <div className="absolute bottom-[100px] right-4 z-20 flex flex-col items-center gap-6">
                             <button
                                 onClick={() => handleLike(highlight.id, highlight.likes || 0)}
