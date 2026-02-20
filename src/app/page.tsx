@@ -8,10 +8,9 @@ import {
   Users,
   History,
   Zap,
-  Search,
   ChevronDown,
   Star,
-  Settings
+  PlusSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { getGlobalStats, getLeaderboard } from '@/lib/stats';
@@ -66,39 +65,20 @@ export default function Home() {
   const mainActions = [
     { title: 'Ranking', icon: Trophy, color: 'bg-orange-500', href: '/leaderboard' },
     { title: 'Plantel', icon: Users, color: 'bg-blue-500', href: '/players' },
-    { title: 'Duelos', icon: Zap, color: 'bg-yellow-400', href: '/vs' },
     { title: 'Historial', icon: History, color: 'bg-zinc-600', href: '/history' },
+    { title: 'Nuevo Partido', icon: PlusSquare, color: 'bg-green-500', href: '/admin' },
   ];
 
   return (
     <main className="min-h-screen bg-[#0A0A0A] text-white pb-32">
-      {/* APP TOP BAR */}
-      <header className="px-6 pt-14 pb-4 bg-[#0A0A0A] sticky top-0 z-50">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex flex-col">
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Sede Central</p>
-            <div className="flex items-center gap-1 group cursor-pointer">
-              <span className="text-sm font-black italic uppercase">Grun Club, Núñez</span>
-              <ChevronDown size={14} className="text-white/40 group-hover:text-white transition-all" />
-            </div>
+      {/* SIMPLE APP HEADER */}
+      <header className="px-6 pt-14 pb-8 flex justify-between items-end">
+        <div>
+          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">FULBITO 4 EVER</p>
+          <div className="flex items-center gap-1 group cursor-pointer">
+            <span className="text-xl font-black italic uppercase">Grun Club, Núñez</span>
+            <ChevronDown size={18} className="text-white/40 group-hover:text-white transition-all ml-1" />
           </div>
-          <Link href="/admin">
-            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <Settings size={18} className="text-white/60" />
-            </div>
-          </Link>
-        </div>
-
-        {/* MOCK SEARCH BAR */}
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <Search size={18} className="text-white/20 group-focus-within:text-accent-orange transition-colors" />
-          </div>
-          <input
-            type="text"
-            placeholder='Buscar jugador, fecha o "morfi"...'
-            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-accent-orange/50 transition-all placeholder:text-white/10"
-          />
         </div>
       </header>
 
@@ -116,17 +96,17 @@ export default function Home() {
               <span className="text-[10px] font-black tracking-widest uppercase text-accent-orange">MVP DE LA SEMANA</span>
             </div>
             <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">
-              {stats.topPlayer?.name}
+              {stats.topPlayer?.name || 'KAI'}
             </h2>
             <div className="flex items-center gap-4">
               <div className="flex flex-col">
                 <span className="text-[9px] text-white/30 font-bold uppercase">Victoria</span>
-                <span className="text-lg font-black italic text-accent-orange">{stats.topPlayer?.winRate.toFixed(0)}%</span>
+                <span className="text-lg font-black italic text-accent-orange">{stats.topPlayer?.winRate.toFixed(0) || 0}%</span>
               </div>
               <div className="w-[1px] h-8 bg-white/10" />
               <div className="flex flex-col">
                 <span className="text-[9px] text-white/30 font-bold uppercase">Puntos</span>
-                <span className="text-lg font-black italic">{stats.topPlayer?.points}</span>
+                <span className="text-lg font-black italic">{stats.topPlayer?.points || 0}</span>
               </div>
             </div>
           </motion.div>
@@ -147,7 +127,7 @@ export default function Home() {
                   <div className={`${action.color} w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20`}>
                     <action.icon size={24} className="text-black" />
                   </div>
-                  <span className="text-xs font-black italic uppercase tracking-wider">{action.title}</span>
+                  <span className="text-xs font-black italic uppercase tracking-wider text-center">{action.title}</span>
                 </motion.div>
               </Link>
             ))}
