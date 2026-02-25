@@ -57,10 +57,41 @@ function PlayerBubble({ player, index }: { player: any, index: number }) {
   );
 }
 
+function MVPPhoto({ name }: { name: string }) {
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPhoto() {
+      if (!name || !supabase) return;
+      const { data } = await supabase
+        .from('player_profiles')
+        .select('photo_url')
+        .eq('name', name)
+        .single();
+      if (data?.photo_url) setPhoto(data.photo_url);
+    }
+    fetchPhoto();
+  }, [name]);
+
+  return (
+    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-accent-orange/30 relative shrink-0 shadow-lg shadow-black/40">
+      {photo ? (
+        <img src={photo} alt={name} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center">
+          <span className="text-4xl font-black italic text-white/20 uppercase">{name[0]}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const year = 2025;
   const stats = useMemo(() => getGlobalStats(year), [year]);
   const leaderboard = useMemo(() => getLeaderboard(year), [year]);
+
+  const topPlayer = stats.topPlayer || leaderboard[0];
 
   const mainActions = [
     { title: 'Ranking', icon: Trophy, color: 'bg-orange-500', href: '/leaderboard' },
@@ -88,27 +119,34 @@ export default function Home() {
         <section>
           <motion.div
             whileTap={{ scale: 0.98 }}
-            className="pwa-card p-8 bg-gradient-to-br from-accent-orange/20 to-transparent border-accent-orange/10 relative overflow-hidden"
+            className="pwa-card p-6 sm:p-8 bg-gradient-to-br from-accent-orange/20 to-transparent border-accent-orange/10 relative overflow-hidden flex items-center justify-between gap-4"
           >
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent-orange/20 blur-[60px]" />
-            <div className="flex items-center gap-2 mb-4">
-              <Star size={12} className="text-accent-orange fill-accent-orange" />
-              <span className="text-[10px] font-black tracking-widest uppercase text-accent-orange">MVP DE LA SEMANA</span>
-            </div>
-            <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">
-              {stats.topPlayer?.name || 'KAI'}
-            </h2>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col">
-                <span className="text-[9px] text-white/30 font-bold uppercase">Victoria</span>
-                <span className="text-lg font-black italic text-accent-orange">{stats.topPlayer?.winRate.toFixed(0) || 0}%</span>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-4">
+                <Star size={12} className="text-accent-orange fill-accent-orange" />
+                <span className="text-[10px] font-black tracking-widest uppercase text-accent-orange">MVP DE LA SEMANA</span>
               </div>
-              <div className="w-[1px] h-8 bg-white/10" />
-              <div className="flex flex-col">
-                <span className="text-[9px] text-white/30 font-bold uppercase">Puntos</span>
-                <span className="text-lg font-black italic">{stats.topPlayer?.points || 0}</span>
+              <h2 className="text-4xl sm:text-5xl font-black italic tracking-tighter uppercase mb-4">
+                {topPlayer?.name || 'KAI'}
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-white/30 font-bold uppercase">Victoria</span>
+                  <span className="text-lg font-black italic text-accent-orange">{topPlayer?.winRate.toFixed(0) || 0}%</span>
+                </div>
+                <div className="w-[1px] h-8 bg-white/10" />
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-white/30 font-bold uppercase">Puntos</span>
+                  <span className="text-lg font-black italic">{topPlayer?.points || 0}</span>
+                </div>
               </div>
             </div>
+            {topPlayer && (
+              <div className="relative z-10">
+                <MVPPhoto name={topPlayer.name} />
+              </div>
+            )}
           </motion.div>
         </section>
 
