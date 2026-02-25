@@ -172,6 +172,27 @@ export default function Home() {
           </div>
         </section>
 
+        {/* DUELOS BANNER */}
+        <section>
+          <Link href="/vs" className="block">
+            <motion.div
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-to-r from-[#FACC15]/10 to-transparent border border-[#FACC15]/20 rounded-[32px] p-6 flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#FACC15] rounded-2xl flex items-center justify-center shadow-lg shadow-black/20">
+                  <Zap size={24} className="text-black" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black italic uppercase tracking-widest text-[#FACC15]">Duelos</h3>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Cara a Cara H2H</p>
+                </div>
+              </div>
+              <ChevronDown size={20} className="text-white/20 -rotate-90 group-hover:text-white transition-colors" />
+            </motion.div>
+          </Link>
+        </section>
+
         {/* HORIZONTAL PLAYERS SCROLL (Favorite stores style) */}
         <section>
           <div className="flex justify-between items-end mb-4 px-1">
