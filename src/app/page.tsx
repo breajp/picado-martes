@@ -10,7 +10,9 @@ import {
   Zap,
   ChevronDown,
   Star,
-  PlusSquare
+  PlusSquare,
+  AlertTriangle,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { getGlobalStats, getLeaderboard } from '@/lib/stats';
@@ -189,6 +191,27 @@ export default function Home() {
                 </div>
               </div>
               <ChevronDown size={20} className="text-white/20 -rotate-90 group-hover:text-white transition-colors" />
+            </motion.div>
+          </Link>
+        </section>
+
+        {/* RECLAMOS BANNER */}
+        <section>
+          <Link href="/claims" className="block">
+            <motion.div
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-to-r from-red-500/10 to-transparent border border-red-500/20 rounded-[32px] p-6 flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20">
+                  <AlertTriangle size={24} className="text-black" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black italic uppercase tracking-widest text-red-500">Mesa de Entradas</h3>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Para llantos y reclamos</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-white/20 group-hover:text-white transition-colors" />
             </motion.div>
           </Link>
         </section>
