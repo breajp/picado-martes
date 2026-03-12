@@ -195,7 +195,7 @@ export default function Home() {
           </Link>
         </section>
 
-        {/* RECLAMOS BANNER */}
+        {/* TRIBUNAL DE DISCIPLINA BANNER */}
         <section>
           <Link href="/claims" className="block">
             <motion.div
@@ -207,7 +207,7 @@ export default function Home() {
                   <AlertTriangle size={24} className="text-black" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black italic uppercase tracking-widest text-red-500">Mesa de Entradas</h3>
+                  <h3 className="text-xl font-black italic uppercase tracking-widest text-red-500">Tribunal de Disciplina</h3>
                   <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Para llantos y reclamos</p>
                 </div>
               </div>

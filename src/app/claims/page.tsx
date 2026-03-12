@@ -205,8 +205,8 @@ export default function ClaimsPage() {
 
             <header className="px-6 pt-14 pb-8 flex justify-between items-end bg-[#0A0A0A]/80 backdrop-blur-xl sticky top-0 z-30 border-b border-white/5">
                 <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Mesa de Entradas</p>
-                    <h1 className="text-3xl font-black italic uppercase tracking-tighter">RECLAMOS</h1>
+                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Tribunal de Disciplina</p>
+                    <h1 className="text-3xl font-black italic uppercase tracking-tighter">EL TRIBUNAL</h1>
                 </div>
                 <button
                     onClick={() => setShowAddForm(true)}
